@@ -10,8 +10,12 @@ function App() {
           Nico Judge
 	  Under Construction
         </p> 
-       </header>
-    </div>
+      </header>
+      <body>
+	  This is a test html body
+      </body>
+	
+     </div>
   );
 }
 
