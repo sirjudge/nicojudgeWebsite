@@ -7,14 +7,10 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Nico Judge
-	  Under Construction
+            Nico Judge
+            Under Construction and coming soon
         </p> 
       </header>
-      <body>
-	  This is a test html body
-      </body>
-	
      </div>
   );
 }
