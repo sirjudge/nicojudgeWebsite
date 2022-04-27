@@ -62,36 +62,21 @@ function makeRequest(method, url) {
     });
 }
 
-function GetGitJsonXhrRequest(){
-    const url = "https://api.github.com/users/sirjudge/repos?callback=CALLBACK";
-
-    let xhr = new XMLHttpRequest();
-    xhr.open('get',url);
-    xhr.send();
-
-    var returnJson;
-    xhr.onload = function() {
-        returnJson = JSON.parse( xhr.response);
-    };
-
-    while (returnJson === null){
-
-    }
+// Example POST method implementation:
+async function GetData(url = '', data = {}) {
+    const response = await fetch(url, {
+        method: 'GET'
+    });
+    return response.json(); // parses JSON response into native JavaScript objects
 }
 
-function GetGitJson(){
-    var url = "https://api.github.com/users/sirjudge/repos?callback=CALLBACK";
-    fetch(url,
-        {
-            method: "GET"
-        })
-        .then(function(res){
+ExtractGitRepoList(){
+    var url="https://api.github.com/users/sirjudge/repos";
+    GetData(url)
+        .then(data => {
 
-            console.log(res.json());
-            return res.json();
-
-        })
-        .then(function(data){ console.log(( JSON.stringify( data ) ) )})
+            console.log(data); // JSON data parsed by `data.json()` call
+        });
 }
 
 function App() {
