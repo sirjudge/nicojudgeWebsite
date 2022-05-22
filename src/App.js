@@ -1,4 +1,7 @@
 import './App.css';
+import './gitProjects'
+import {RepoData} from "./gitProjects";
+import moment from "moment";
 
 function Header(){
     return (
@@ -26,32 +29,51 @@ async function GetData(url = '', data = {}) {
     return response.json();// parses JSON response into native JavaScript objects
 }
 
-// async function ExtractGitRepoList(){
-async function RepoList(){
+function ReturnRepoList(){
+    moment.locale('en');
+    return (
+        <tbody>
+            {RepoData.map(repo => {
+                return (
+                    <tr key={repo.id}>
+                        <td>
+                            <a href={repo.url}>{repo.name}</a>
+                        </td>
+                        <td>
+                            {moment(repo.pushed_at).format('MMM D, YYYY')}
+                        </td>
+                    </tr>
+                )
+            })}
+        </tbody>
+    );
+}
+
+const GenerateRepoList = async() => {
     var url="https://api.github.com/users/sirjudge/repos";
     var repoData;
     await GetData(url)
         .then(data => {
-            repoData = data;
+            var repoData = [];
+            for(var i in data)
+                repoData.push([i, data [i]]);
         });
 
     return (
-        <table>
-            <tbody>
-            {repoData.map(repo => {
-                    return (
+        <tbody>
+            {RepoData.map(repo => {
+                return (
                     <tr key={repo.id}>
                         <td>
-                            {repo.name}
+                            <a href={repo.html_url}>{repo.name}</a>
                         </td>
                         <td>
-                            <a href={repo.url}></a>
+                            {moment(repo.pushed_at).format('MMM D, YYYY')}
                         </td>
                     </tr>
-                    )
-                })}
-            </tbody>
-        </table>
+                )
+            })}
+        </tbody>
     );
 }
 
@@ -61,7 +83,10 @@ function App() {
         <header className="App-header">
           <Header></Header>
         </header>
-        <RepoList></RepoList>
+        <table>
+                <ReturnRepoList></ReturnRepoList>
+        </table>
+
      </div>
   );
 }
