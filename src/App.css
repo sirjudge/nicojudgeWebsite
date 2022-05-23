@@ -12,16 +12,36 @@
   color: white;
 }
 
-table, th, td {
+
+.RepoTable {
+  margin-left: auto;
+  margin-right: auto;
   border: 1px solid #ffffff;
 }
 
+.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 a{
-  color:   #839496;
+  color: #6c71c4;
 }
 
 body{
   background: #073642 ;
+}
+
+.gitIcon{
+  color: #eee8d5;
+}
+
+.emailIcon{
+  color: #b58900;
+}
+
+.linkedInIcon{
+
 }
 
 .orangeText{
@@ -30,4 +50,12 @@ body{
 
 .App-link {
   color: #61dafb;
+}
+
+.bio{
+  color:#93a1a1;
+}
+
+.tableHeader{
+  color: #839496;
 }

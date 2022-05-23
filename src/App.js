@@ -10,13 +10,13 @@ function Header(){
         <div>
             <h1 id="nameHeader">Nico Judge</h1>
             <h4>Baltimore, MD</h4>
-            <table>
+            <table className="center">
                 <tr>
                     <td>
-                        <a href="www.github.com/sirjudge"><FontAwesomeIcon icon={brands("github")}/></a>
+                        <a href="https://www.github.com/sirjudge" className="gitIcon"><FontAwesomeIcon icon={brands("github")}/></a>
                     </td>
                     <td>
-                        <a href="mailto:nico.a.judge@gmail.com"><FontAwesomeIcon icon={solid("envelope")}/></a>
+                        <a href="mailto:nico.a.judge@gmail.com" className="emailIcon"><FontAwesomeIcon icon={solid("envelope")}/></a>
                     </td>
                     <td>
                         <a href="https://www.linkedin.com/in/nicojudge/"><FontAwesomeIcon icon={brands("linkedin")}/></a>
@@ -39,10 +39,10 @@ function ReturnRepoList(){
     return (
         <tbody>
             <tr>
-                <td>
+                <td className="tableHeader">
                     Repository
                 </td>
-                <td>
+                <td className="tableHeader">
                     Last Update
                 </td>
             </tr>
@@ -90,13 +90,21 @@ const GenerateRepoList = async() => {
     );
 }
 
+function Bio(){
+    return (
+        <span className="bio">Enthusiastic full stack web developer with a passion for automation. Check out my projects below!</span>
+    );
+
+}
+
 function App() {
   return (
     <div className="App">
         <header className="App-header">
           <Header></Header>
         </header>
-        <table>
+        <Bio></Bio>
+        <table className="RepoTable">
                 <ReturnRepoList></ReturnRepoList>
         </table>
 
