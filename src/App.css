@@ -1,5 +1,34 @@
+a{
+  color: #6c71c4;
+}
+
+body{
+  background: #073642 ;
+}
+
+
 .App {
   text-align: center;
+}
+
+.centerCol{
+  align-content: center;
+}
+
+.location{
+  margin:0;
+  padding:0;
+  align-content: center;
+  font-size: 30px;
+  color: #b58900;
+}
+
+.header{
+  font-size: 50px;
+  margin:0;
+  padding:0;
+  align-content: center;
+  color: #657b83;
 }
 
 .App-header {
@@ -24,24 +53,31 @@
   margin-right: auto;
 }
 
-a{
-  color: #6c71c4;
+.bioPicture{
+  margin-left: auto;
+  margin-right: auto;
 }
 
-body{
-  background: #073642 ;
+.scaledImage {
+  height: auto;
+  width: auto;
+  max-width: 300px;
+  max-height: 300px;
 }
 
 .gitIcon{
   color: #eee8d5;
+  font-size: 40px;
 }
 
 .emailIcon{
   color: #b58900;
+  font-size: 40px;
 }
 
 .linkedInIcon{
-
+  color: #268bd2;
+  font-size: 40px;
 }
 
 .orangeText{

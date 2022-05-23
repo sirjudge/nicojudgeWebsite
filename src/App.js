@@ -1,29 +1,42 @@
 import './App.css';
-import './gitProjects'
 import {RepoData} from "./gitProjects";
 import moment from "moment";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { solid, regular, brands } from '@fortawesome/fontawesome-svg-core/import.macro' // <-- import styles to be used
+import mapleNicoPhoto from './images/mapleNicoPhoto.jpg'
+import { Grid, Row, Col } from 'react-flexbox-grid';
 
 function Header(){
     return (
-        <div>
-            <h1 id="nameHeader">Nico Judge</h1>
-            <h4>Baltimore, MD</h4>
-            <table className="center">
-                <tr>
-                    <td>
-                        <a href="https://www.github.com/sirjudge" className="gitIcon"><FontAwesomeIcon icon={brands("github")}/></a>
-                    </td>
-                    <td>
-                        <a href="mailto:nico.a.judge@gmail.com" className="emailIcon"><FontAwesomeIcon icon={solid("envelope")}/></a>
-                    </td>
-                    <td>
-                        <a href="https://www.linkedin.com/in/nicojudge/"><FontAwesomeIcon icon={brands("linkedin")}/></a>
-                    </td>
-                </tr>
-            </table>
-        </div>
+            <Grid fluid>
+                <Row>
+                    <Col className="center">
+                        <h1 className="header center">Nico Judge</h1>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col className="center">
+                        <h4 className="location">Full Stack Software Engineer</h4>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col className="center">
+                        <Row>
+                            <Col>
+                                <a href="https://www.github.com/sirjudge" className="gitIcon"><FontAwesomeIcon icon={brands("github")}/></a>
+                            </Col>
+                            <Col>
+                                <a href="mailto:nico.a.judge@gmail.com" className="emailIcon"><FontAwesomeIcon icon={solid("envelope")}/></a>
+                            </Col>
+                            <Col>
+                                <a href="https://www.linkedin.com/in/nicojudge/"  className="linkedInIcon"><FontAwesomeIcon icon={brands("linkedin")}/></a>
+                            </Col>
+                        </Row>
+                    </Col>
+
+                </Row>
+            </Grid>
+
     )
 }
 
@@ -63,18 +76,16 @@ function ReturnRepoList(){
 }
 
 const GenerateRepoList = async() => {
-    var url="https://api.github.com/users/sirjudge/repos";
-    var repoData;
+    let url = "https://api.github.com/users/sirjudge/repos", repoData = [];
     await GetData(url)
         .then(data => {
-            var repoData = [];
             for(var i in data)
                 repoData.push([i, data [i]]);
         });
 
     return (
         <tbody>
-            {RepoData.map(repo => {
+            {repoData.map(repo => {
                 return (
                     <tr key={repo.id}>
                         <td>
@@ -92,22 +103,31 @@ const GenerateRepoList = async() => {
 
 function Bio(){
     return (
-        <span className="bio">Enthusiastic full stack web developer with a passion for automation. Check out my projects below!</span>
+        <Grid fluid>
+            <Row>
+                <Col xs={6}>
+                    <Row>
+                        <span className="bio">Enthusiastic full stack web developer with a passion for automation. Check out my projects below!</span>
+                    </Row>
+                    <Row>
+                        <ReturnRepoList></ReturnRepoList>
+                    </Row>
+                </Col>
+                <Col>
+                    <img className="scaledImage" src={mapleNicoPhoto} alt="Me and My dog Maple"/>
+                </Col>
+            </Row>
+        </Grid>
     );
-
 }
 
 function App() {
   return (
     <div className="App">
-        <header className="App-header">
-          <Header></Header>
-        </header>
+        {/*<header className="App-header">*/}
+        {/*</header>*/}
+        <Header></Header>
         <Bio></Bio>
-        <table className="RepoTable">
-                <ReturnRepoList></ReturnRepoList>
-        </table>
-
      </div>
   );
 }
