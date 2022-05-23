@@ -16,6 +16,18 @@ table, th, td {
   border: 1px solid #ffffff;
 }
 
+a{
+  color:   #839496;
+}
+
+body{
+  background: #073642 ;
+}
+
+.orangeText{
+  color: #cb4b16;
+}
+
 .App-link {
   color: #61dafb;
 }

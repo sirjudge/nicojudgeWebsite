@@ -38,13 +38,21 @@ function ReturnRepoList(){
     moment.locale('en');
     return (
         <tbody>
+            <tr>
+                <td>
+                    Repository
+                </td>
+                <td>
+                    Last Update
+                </td>
+            </tr>
             {RepoData.map(repo => {
                 return (
                     <tr key={repo.id}>
                         <td>
                             <a href={repo.url}>{repo.name}</a>
                         </td>
-                        <td>
+                        <td className="orangeText">
                             {moment(repo.pushed_at).format('MMM D, YYYY')}
                         </td>
                     </tr>
