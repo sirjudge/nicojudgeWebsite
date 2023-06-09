@@ -1,5 +1,10 @@
 ﻿html, body {
     margin: 0;
+    height:100%;
+}
+
+.fullBody{
+    height: 100%;
 }
 
 h1:focus {
@@ -58,3 +63,4 @@ h1:focus {
 .hidden{
     visibility:hidden;
 }
+

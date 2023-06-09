@@ -1,15 +1,4 @@
-﻿.navList{
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    position: relative;
-    width: 100%;
-}
-
-.navLink{
-    color:#cb4b16;
-}
-
+﻿
 /* UTILITIES */
 * {
     margin: 0;
@@ -37,6 +26,8 @@ li {
     padding: 20px;
     background-color: teal;
     color: #fff;
+    position: relative;
+    width: 100%;
 }
 
 .nav-links a {
@@ -53,6 +44,7 @@ li {
     display: flex;
     gap: 1em;
     font-size: 18px;
+
 }
 
 .menu li:hover {
