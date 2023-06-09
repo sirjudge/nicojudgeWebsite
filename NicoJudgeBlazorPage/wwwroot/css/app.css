@@ -50,15 +50,11 @@ h1:focus {
     content: "An error has occurred."
 }
 
-
 .center {
     margin-left: auto;
     margin-right: auto;
 }
 
-
-.navBar{
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
+.hidden{
+    visibility:hidden;
 }

@@ -1,31 +1,35 @@
-﻿@page "/DndHelpers"
-<h3>DndHelpers</h3>
+﻿@page "/dndhelper"
+<HeaderNavBar></HeaderNavBar>
+<body class="DarkBackground">
+    <h3>DND Helper</h3>
+    <div id="diceRoller">
+        <p>
+            Dice roller <br/>
+            Number of Dice to roll:<input type="text" @bind="_numDiceToRollString"> <br/>
+            Number of sides:<input type="text" @bind="_inputRollNumberString" val> <br/>
+        </p>
 
-<div id="diceRoller">
-    Dice roller <br/>
-    Number of Dice to roll:<input type="text" @bind="NumDiceToRollString"> <br/>
-    Number of sides:<input type="text" @bind="InputRollNumberString" val> <br/>
-    
-    <button class="btn btn-primary" @onclick="Roll">Update Button Time</button>
-    
-    <p role="status"> your rolled number is: @NumberRolled</p>
-</div>
+        <button class="btn btn-primary" @onclick="Roll">RollDice</button>
 
+        <p role="status"> your rolled number is: @_numberRolled</p>
+    </div>
+</body>
 
 @code {
-    private string NumDiceToRollString = "";
-    private string InputRollNumberString = "";
-    private long NumberRolled = 0;
-    private Random Random = new Random();
+    private string _numDiceToRollString = "";
+    private string _inputRollNumberString = "";
+    private long _numberRolled = 0;
     
     private void Roll()
     {
-        NumberRolled = 0;
-        if (long.TryParse(NumDiceToRollString, out var numDice) 
-            && long.TryParse(InputRollNumberString, out var inputRoll))
+        var random = new Random(int.Parse(DateTime.Now.ToString("hhmmss")));
+        _numberRolled = 0;
+        if (long.TryParse(_numDiceToRollString, out var numDice) 
+            && long.TryParse(_inputRollNumberString, out var inputRoll))
         {
             for (var i = 0; i < numDice; i++)
-                NumberRolled += this.Random.NextInt64(0, inputRoll);
+                _numberRolled += random.NextInt64(0, inputRoll);
         }
+        StateHasChanged();
     }
 }

@@ -1,38 +1,41 @@
 ﻿@page "/test"
 @using System.Reflection.Metadata
+<HeaderNavBar></HeaderNavBar>
+<body class="DarkBackground">
+    <div>
+        <p role="status">Current count: @currentCount</p>
+        <button class="btn btn-primary" @onclick="IncrementCount">Increment Counter</button>
+    </div>
+    
+    <div id="timeBox">
+        <p role="status" class="MainText">
+            Original Time page loaded at: @OriginalPageLoadTimeString
+        </p>
+        <p class="MainText">
+            Button Time Loaded at: @ButtonUpdateTime
+        </p>
+        <button class="btn btn-primary" @onclick="UpdateButtonTime">Update Button Time</button>
+    </div>
+    
+    <div id="tableManipulations">
+        <h1>Testing Table</h1>
+        <button class="btn btn-primary" @onclick="RandomizeMessages">Generate Random Guids</button>
+        <table>
+             <div class="row profile-row" role="status" style="margin-left:10px">
+                    @foreach (var message in randomMessages)
+                    {
+                        <tr>
+                            <td class="MainText">
+                                @message
+                            </td>
+                        </tr>
+                    }
+                </div>
+        </table>
+       
+    </div>
+</body>
 
-<div>
-    <p role="status">Current count: @currentCount</p>
-    <button class="btn btn-primary" @onclick="IncrementCount">Increment Counter</button>
-</div>
-
-<div id="timeBox">
-    <p role="status">
-        Original Time page loaded at: @OriginalPageLoadTimeString
-    </p>
-    <p>
-        Button Time Loaded at: @ButtonUpdateTime
-    </p>
-    <button class="btn btn-primary" @onclick="UpdateButtonTime">Update Button Time</button>
-</div>
-
-<div id="tableManipulations">
-    <h1>Testing Table</h1>
-    <button class="btn btn-primary" @onclick="RandomizeMessages">Generate Random Guids</button>
-    <table>
-         <div class="row profile-row" role="status" style="margin-left:10px">
-                @foreach (var message in randomMessages)
-                {
-                    <tr>
-                        <td>
-                            @message
-                        </td>
-                    </tr>
-                }
-            </div>
-    </table>
-   
-</div>
 @code {
     List<String> randomMessages = new List<String>();
     
