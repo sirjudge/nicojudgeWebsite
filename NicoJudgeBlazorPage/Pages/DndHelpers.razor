@@ -1,17 +1,16 @@
 ﻿@page "/dndhelper"
 <HeaderNavBar></HeaderNavBar>
 <body class="DarkBackground">
-    <h3>DND Helper</h3>
+    <h3 class="HeaderText">DND Helper</h3>
     <div id="diceRoller">
         <p>
-            Dice roller <br/>
-            Number of Dice to roll:<input type="text" @bind="_numDiceToRollString"> <br/>
-            Number of sides:<input type="text" @bind="_inputRollNumberString" val> <br/>
-        </p>
-
-        <button class="btn btn-primary" @onclick="Roll">RollDice</button>
-
-        <p role="status"> your rolled number is: @_numberRolled</p>
+            <h3 class="SubHeaderText">Dice roller</h3>
+            <span class="MainText">
+                Number of Dice to roll:<input type="text" @bind="_numDiceToRollString"> <br/>  
+                Number of sides:<input type="text" @bind="_inputRollNumberString" val> <br/>
+                <button class="btn btn-primary" @onclick="Roll">RollDice</button>
+                <p role="status"> your rolled number is: @_numberRolled</p>
+            </span>
     </div>
 </body>
 
