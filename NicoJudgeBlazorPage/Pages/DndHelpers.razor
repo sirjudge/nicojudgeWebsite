@@ -1,0 +1,31 @@
+﻿@page "/DndHelpers"
+<h3>DndHelpers</h3>
+
+<div id="diceRoller">
+    Dice roller <br/>
+    Number of Dice to roll:<input type="text" @bind="NumDiceToRollString"> <br/>
+    Number of sides:<input type="text" @bind="InputRollNumberString" val> <br/>
+    
+    <button class="btn btn-primary" @onclick="Roll">Update Button Time</button>
+    
+    <p role="status"> your rolled number is: @NumberRolled</p>
+</div>
+
+
+@code {
+    private string NumDiceToRollString = "";
+    private string InputRollNumberString = "";
+    private long NumberRolled = 0;
+    private Random Random = new Random();
+    
+    private void Roll()
+    {
+        NumberRolled = 0;
+        if (long.TryParse(NumDiceToRollString, out var numDice) 
+            && long.TryParse(InputRollNumberString, out var inputRoll))
+        {
+            for (var i = 0; i < numDice; i++)
+                NumberRolled += this.Random.NextInt64(0, inputRoll);
+        }
+    }
+}
