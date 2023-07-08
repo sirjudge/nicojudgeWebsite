@@ -4,11 +4,11 @@ import {ClipLoader} from "react-spinners";
 
 
 
-async function GetRepoData(url){
+async function GetRepoData(url:string){
     let returnRepoData: any[] = [];
     await GetData(url)
         .then(data => {
-            for(var i in data)
+            for(let i in data)
                 returnRepoData.push([i, data[i]]);
             return returnRepoData;
         });
@@ -29,7 +29,7 @@ export default function RepoList() {
         });
     }
 
-    if (repoData !== undefined){
+    if (!dataRequested || repoData !== undefined){
         return(
             <div>
                 <ClipLoader
@@ -43,11 +43,23 @@ export default function RepoList() {
     }
     else {
        console.log(repoData);
+       if (repoData === undefined)
         return (
-            <div id="repoDataTable">
+           <div>
                 <p> data totally returned</p>
                 <p>dataLength:{JSON.stringify(repoData)}</p>
             </div>
         );
+       else {
+           return (
+               <div id="repoDataTable">
+                  <table>
+                      <tbody>
+                          <tr>this is a data Row</tr>
+                      </tbody>
+                  </table>
+               </div>
+           );
+       }
     }
 }
