@@ -6,7 +6,7 @@ async function GetRepoData(url:string){
         method: 'GET'
     });
    const repoJson = await fetchPromise.json();
-   repo
+   return repoJson;
 }
 
 function customDateSort(a:string,b:string){
