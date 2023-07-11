@@ -9,11 +9,6 @@ async function GetRepoData(url:string){
 
    const repoJson = await fetchPromise.json();
    return repoJson;
-   //
-    // for(let i in repoJson)
-    //     returnRepoData.push([i, repoJson[i]]);
-    //
-    // return returnRepoData;
 }
 
 export default function RepoList() {
