@@ -1,14 +1,11 @@
-import React, { useState } from 'react'
+import React, {useState} from 'react'
 import {ClipLoader} from "react-spinners";
-
+import '../Styles/repoData.css'
 async function GetRepoData(url:string){
-    // let returnRepoData: any[] = [];
     const fetchPromise = await fetch(url, {
         method: 'GET'
     });
-
-   const repoJson = await fetchPromise.json();
-   return repoJson;
+   return await fetchPromise.json();
 }
 
 export default function RepoList() {
@@ -40,8 +37,6 @@ export default function RepoList() {
         );
     }
     else {
-        console.log("should be data here");
-        console.log(repoData);
         return (
            <div id="repoDataTable">
                <table>
