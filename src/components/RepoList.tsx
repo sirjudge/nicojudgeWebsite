@@ -5,7 +5,12 @@ async function GetRepoData(url:string){
     const fetchPromise = await fetch(url, {
         method: 'GET'
     });
-   return await fetchPromise.json();
+   const repoJson = await fetchPromise.json();
+   repo
+}
+
+function customDateSort(a:string,b:string){
+    return new Date(a).getTime() - new Date(b).getTime();
 }
 
 export default function RepoList() {
