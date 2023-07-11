@@ -1,23 +1,25 @@
-import {GetData} from "../functions/GetData";
 import React, { useState } from 'react'
 import {ClipLoader} from "react-spinners";
 
-
-
 async function GetRepoData(url:string){
-    let returnRepoData: any[] = [];
-    await GetData(url)
-        .then(data => {
-            for(let i in data)
-                returnRepoData.push([i, data[i]]);
-            return returnRepoData;
-        });
+    // let returnRepoData: any[] = [];
+    const fetchPromise = await fetch(url, {
+        method: 'GET'
+    });
+
+   const repoJson = await fetchPromise.json();
+   return repoJson;
+   //
+    // for(let i in repoJson)
+    //     returnRepoData.push([i, repoJson[i]]);
+    //
+    // return returnRepoData;
 }
 
 export default function RepoList() {
     const [repoData,setRepoData] = useState();
     const [dataRequested,setDataRequested] = useState(false);
-
+    const [dataReturned,setDataReturned] = useState(false);
     const url = "https://api.github.com/users/sirjudge/repos";
     let [color, setColor] = useState("#ffffff");
 
@@ -26,10 +28,11 @@ export default function RepoList() {
         GetRepoData(url).then(response =>
         {
             setRepoData(response);
+            setDataReturned(true);
         });
     }
 
-    if (!dataRequested || repoData !== undefined){
+    if (!dataReturned){
         return(
             <div>
                 <ClipLoader
@@ -42,24 +45,29 @@ export default function RepoList() {
         );
     }
     else {
-       console.log(repoData);
-       if (repoData === undefined)
+        console.log("should be data here");
+        console.log(repoData);
         return (
-           <div>
-                <p> data totally returned</p>
-                <p>dataLength:{JSON.stringify(repoData)}</p>
-            </div>
-        );
-       else {
-           return (
-               <div id="repoDataTable">
-                  <table>
-                      <tbody>
-                          <tr>this is a data Row</tr>
-                      </tbody>
-                  </table>
-               </div>
-           );
-       }
+           <div id="repoDataTable">
+               <table>
+                  <tbody>
+                  {
+                      repoData.map(function (repo:any){
+                          return(
+                            <tr>
+                                <td>
+                                    <a href={repo.html_url}> {repo.name}</a>
+                                </td>
+                                <td>
+                                    {repo.description}
+                                </td>
+                            </tr>
+                          );
+                      })
+                  }
+                  </tbody>
+              </table>
+           </div>
+       );
     }
 }

@@ -9,7 +9,7 @@ function App() {
     <div className="App">
         <script src="https://kit.fontawesome.com/dd6b78a06a.js" crossOrigin="anonymous"></script>
         <Header></Header>
-      <RepoList></RepoList>
+        <RepoList></RepoList>
     </div>
   );
 }
