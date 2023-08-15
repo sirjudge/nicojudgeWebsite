@@ -6,7 +6,28 @@ async function GetRepoData(url:string){
         method: 'GET'
     });
    const repoJson = await fetchPromise.json();
+
+  var newRepoData = GetRepoDataNew();
    return repoJson;
+}
+
+function GetRepoDataNew(){
+    const url = "https://api.github.com/users/sirjudge/repos";
+    fetch(url)
+        .then(response => response.json())
+        .then(repos => {
+            // Sort repositories by creation date in descending order
+            repos.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            // Get the latest 5 repositories
+            const latestRepos = repos.slice(0, 5);
+
+            console.log('Latest 5 repositories:');
+            latestRepos.forEach(repo => {
+                console.log(`${repo.name} - ${repo.html_url}`);
+            });
+        })
+        .catch(error => console.error('Error fetching repositories:', error));
 }
 
 function customDateSort(a:string,b:string){
