@@ -19,7 +19,8 @@
     "react-scripts": "^5.0.1",
     "react-spinners": "^0.13.8",
     "typescript": "^3.2.1",
-    "web-vitals": "^3.3.2"
+    "web-vitals": "^3.3.2",
+    "@react-buddy/ide-toolbox": "^2.4.0"
   },
   "scripts": {
     "start": "react-scripts start",
