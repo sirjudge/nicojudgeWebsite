@@ -1,13 +1,15 @@
 import React, {useState} from 'react'
 import {ClipLoader} from "react-spinners";
 import '../Styles/repoData.css'
+import '../Styles/GlobalStyle.css'
+
 async function GetRepoData(url:string){
     const fetchPromise = await fetch(url, {
         method: 'GET'
     });
    const repoJson = await fetchPromise.json();
 
-  var newRepoData = GetRepoDataNew();
+   GetRepoDataNew();
    return repoJson;
 }
 
@@ -30,16 +32,12 @@ function GetRepoDataNew(){
         .catch(error => console.error('Error fetching repositories:', error));
 }
 
-function customDateSort(a:string,b:string){
-    return new Date(a).getTime() - new Date(b).getTime();
-}
-
 export default function RepoList() {
     const [repoData,setRepoData] = useState();
     const [dataRequested,setDataRequested] = useState(false);
     const [dataReturned,setDataReturned] = useState(false);
     const url = "https://api.github.com/users/sirjudge/repos";
-    let [color, setColor] = useState("#ffffff");
+    let [color] = useState("#ffffff");
 
     if (!dataRequested){
         setDataRequested(true);
@@ -52,7 +50,7 @@ export default function RepoList() {
 
     if (!dataReturned){
         return(
-            <div>
+            <div className="centered">
                 <ClipLoader
                     color={color}
                     size={150}
@@ -64,7 +62,7 @@ export default function RepoList() {
     }
     else {
         return (
-           <div id="repoDataTable">
+           <div id="repoDataTable" className="centered">
                <table>
                   <tbody>
                   {
