@@ -1,7 +1,7 @@
 export default function AboutMe(){
     return (
         <div>
-            <p>I am a cool guy</p>
+            <p>Full Stack Software Engineer</p>
         </div>
     )
 }
