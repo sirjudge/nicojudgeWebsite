@@ -4,32 +4,19 @@ import '../Styles/repoData.css'
 import '../Styles/GlobalStyle.css'
 
 async function GetRepoData(url:string){
-    const fetchPromise = await fetch(url, {
-        method: 'GET'
-    });
-   const repoJson = await fetchPromise.json();
-
-   GetRepoDataNew();
-   return repoJson;
-}
-
-function GetRepoDataNew(){
-    const url = "https://api.github.com/users/sirjudge/repos";
-    fetch(url)
+    var latestRepos; 
+    url = "https://api.github.com/users/sirjudge/repos";
+    await fetch(url)
         .then(response => response.json())
         .then(repos => {
-            // Sort repositories by creation date in descending order
-            repos.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                // Sort repositories by creation date in descending order
+                repos.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-            // Get the latest 5 repositories
-            const latestRepos = repos.slice(0, 5);
-
-            console.log('Latest 5 repositories:');
-            latestRepos.forEach(repo => {
-                console.log(`${repo.name} - ${repo.html_url}`);
-            });
-        })
-        .catch(error => console.error('Error fetching repositories:', error));
+                // Get the latest 5 repositories
+                latestRepos = repos.slice(0, 5);
+                })
+    .catch(error => console.error('Error fetching repositories:', error));
+    return latestRepos;
 }
 
 export default function RepoList() {
@@ -63,12 +50,12 @@ export default function RepoList() {
     else {
         return (
            <div id="repoDataTable" className="centered">
-               <table>
+                <table>
                   <tbody>
                   {
                       repoData.map(function (repo:any){
                           return(
-                            <tr>
+                            <tr key={repo}>
                                 <td>
                                     <a href={repo.html_url}> {repo.name}</a>
                                 </td>
