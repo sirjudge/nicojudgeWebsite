@@ -10,11 +10,11 @@ async function GetRepoData(url:string){
         .then(response => response.json())
         .then(repos => {
                 // Sort repositories by creation date in descending order
-                repos.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                //repos.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
                 // Get the latest 5 repositories
                 latestRepos = repos.slice(0, 5);
-                })
+            })
     .catch(error => console.error('Error fetching repositories:', error));
     return latestRepos;
 }
@@ -48,7 +48,10 @@ export default function RepoList() {
         );
     }
     else {
-        return (
+        if (repoData == undefined || repoData == null || repoData.length === 0)
+            return (<div className="centered">No repositories found</div>);
+       
+      return (
            <div id="repoDataTable" className="centered">
                 <table>
                   <tbody>
