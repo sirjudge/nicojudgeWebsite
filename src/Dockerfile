@@ -1,0 +1,5 @@
+FROM 
+WORKDIR /src
+EXPOSE 3000
+RUN ls
+RUN ls /target
