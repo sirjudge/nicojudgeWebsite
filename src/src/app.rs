@@ -1,6 +1,7 @@
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
+ 
 
 /// Entry point for the application
 #[component]
@@ -44,6 +45,7 @@ fn HomePage() -> impl IntoView {
             "This is a simple counter to demonstrate the reactive nature of Leptos"
         </p>
         <button on:click=on_click>"Click Me: " {count}</button>
+        <Repos/>
     }
 }
 
