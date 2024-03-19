@@ -25,7 +25,13 @@ fn get_repos() -> Vec<repo> {
    let repos = vec![
         repo {
             name: "leptos".to_string(),
-            html_url: "www.github.com/sirjudge".to_string)
+            html_url: "www.github.com/sirjudge".to_string()
+        },
+        repo {
+            name: "leptos".to_string(),
+            html_url: "www.github.com/sirjudge".to_string()
+        }
+   ];
     /* 
     let url = "https://api.github.com/users/nicojudge/repos";
     let request = Request::new(url);
@@ -57,13 +63,7 @@ fn ReposLoaded(repos: Vec<repo>) -> impl IntoView {
                 These are my repos 
             </p> 
             <ul>
-                {for repos.iter().map(|repo| {
-                    view! {
-                        <li>
-                            <a href={repo.html_url.clone()}>{repo.name.clone()}</a>
-                        </li>
-                    }
-                })}
+                <li>"Fake repo"</li>
             </ul>
         </div>
     }
