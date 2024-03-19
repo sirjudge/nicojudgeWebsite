@@ -1,7 +1,7 @@
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
- 
+use crate::input;
 
 /// Entry point for the application
 #[component]
@@ -28,10 +28,6 @@ pub fn App() -> impl IntoView {
 /// Renders the home page of your application.
 #[component]
 fn HomePage() -> impl IntoView {
-    // Creates a reactive value to update the button
-    let (count, set_count) = create_signal(0);
-    let on_click = move |_| set_count.update(|count| *count += 1);
-
     view! {
         <h1>"Welcome!"</h1>
         <p>
@@ -40,12 +36,7 @@ fn HomePage() -> impl IntoView {
             create fast, modern web applications and is deplyoyed and ran on 
             a docker file hosted on a linux server.
         </p>
-
-        <p>
-            "This is a simple counter to demonstrate the reactive nature of Leptos"
-        </p>
-        <button on:click=on_click>"Click Me: " {count}</button>
-        <Repos/>
+        <input::Input/>
     }
 }
 
