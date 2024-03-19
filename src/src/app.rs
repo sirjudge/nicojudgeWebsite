@@ -2,7 +2,6 @@ use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 use crate::input;
-use crate::repos;
 
 /// Entry point for the application
 #[component]
@@ -38,7 +37,6 @@ fn HomePage() -> impl IntoView {
             a docker file hosted on a linux server.
         </p>
         <input::Input/>
-        <repos::Repos/>
     }
 }
 

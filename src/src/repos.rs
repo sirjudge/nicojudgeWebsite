@@ -1,51 +1,42 @@
 use leptos::*;
-use serde::{Deserialize, Serialize};
 
-struct repo {
-    name: String,
-    html_url: String
+
+#[component]
+pub fn Repos() -> impl IntoView {
+    let repos = get_repos();
+    view! {
+        <div id="repos">
+            <h1>"These are my repos!"</h1>
+            <p>
+                These are my repos 
+            </p> 
+            <ul>
+                {match repos {
+                    Ok(repos) => {
+                        ReposLoaded(repos)
+                    }
+                    Err(_) => {
+                        reposNotLoaded()
+                    }
+                }}
+            </ul>
+        </div>
+    }
 }
 
-fn get_repos() -> Vec<repo> {
-    //let url = "https://api.github.com/users/nicojudge/repos";
-    // hardcode a list for now
-    let repos = vec![
-        repo {
-            name: "nico-website".to_string(),
-            html_url: "".to_string()
-        },
-    ];
-
-    /*c
+fn get_repos() -> impl Future<Item = Vec<repo>, Error = ()> {
+    let url = "https://api.github.com/users/nicojudge/repos";
     let request = Request::new(url);
-    let git_auth_token = "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";
-    let auth_token = format!("bearer {}", git_auth_token );
+    let auth_token = format!("bearer {}", env!("GITHUB_AUTH_TOKEN"));
     request.headers().set("Authorization", auth_token);
     let future = fetch(request)
         .and_then(|response| response.json::<Vec<repo>>())
         .map_err(|_| ());
     future
-    */
-    repos
 }
 
 #[component]
-pub fn Repos() -> impl IntoView {
-    let repos = get_repos();
-    println!("repos: {:?}", repos.len());
-    if repos.is_empty() {
-        view! {
-            <ReposNotLoaded/>
-        }
-    } else {
-        view! {
-            <ReposLoaded repos={repos}/>
-        }
-    }
-}
-
-#[component]
-fn ReposNotLoaded() -> impl IntoView {
+fn reposNotLoaded() -> impl IntoView {
     view! {
         <div id="repos">
             <h1>"Loading Repos..."</h1>
@@ -53,7 +44,7 @@ fn ReposNotLoaded() -> impl IntoView {
     }
 }
 
-#[component]
+#[Component]
 fn ReposLoaded(repos: Vec<repo>) -> impl IntoView {
     view! {
         <div id="repos">
@@ -62,6 +53,13 @@ fn ReposLoaded(repos: Vec<repo>) -> impl IntoView {
                 These are my repos 
             </p> 
             <ul>
+                {for repos.iter().map(|repo| {
+                    view! {
+                        <li>
+                            <a href={repo.html_url.clone()}>{repo.name.clone()}</a>
+                        </li>
+                    }
+                })}
             </ul>
         </div>
     }
