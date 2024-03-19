@@ -2,20 +2,17 @@ use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
+/// Entry point for the application
 #[component]
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
-
     view! {
         // injects a stylesheet into the document <head>
         // id=leptos means cargo-leptos will hot-reload this stylesheet
         <Stylesheet id="leptos" href="/pkg/nico-website.css"/>
-
-        // sets the document title
-        <Title text="Welcome to Leptos"/>
-
         // content for this welcome page
+        <Header/>
         <Router>
             <main>
                 <Routes>
@@ -35,8 +32,30 @@ fn HomePage() -> impl IntoView {
     let on_click = move |_| set_count.update(|count| *count += 1);
 
     view! {
-        <h1>"Welcome to Leptos!"</h1>
+        <h1>"Welcome!"</h1>
+        <p>
+            Welcome to my website! This website is powered by Leptos, a Rust 
+            web framework that uses WebAssembly and server-side rendering to
+            create fast, modern web applications and is deplyoyed and ran on 
+            a docker file hosted on a linux server.
+        </p>
+
+        <p>
+            "This is a simple counter to demonstrate the reactive nature of Leptos"
+        </p>
         <button on:click=on_click>"Click Me: " {count}</button>
+    }
+}
+
+/// Renders the headers of the application
+#[component]
+fn Header() -> impl IntoView {
+    view! {
+        <Title text="nicojudge.com"/>
+        <header>
+            <h1>"Nico Judge"</h1>
+            <h1>"Full Stack Software Engineer"</h1>
+        </header>
     }
 }
 
