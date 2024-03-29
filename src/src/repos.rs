@@ -1,37 +1,46 @@
 use leptos::*;
-use std::env;
+use std::clone::Clone;
 
-struct repo {
-    name: String,
-    html_url: String,
+#[derive(Copy, Clone, Debug, PartialEq,Eq)]
+struct Repo {
+    name: RwSignal<String>,
+    html_url: RwSignal<String>,
 }
 
+/// Root level component for the repos section
 #[component]
 pub fn Repos() -> impl IntoView {
     let repos = get_repos();
+    println!("# repos found: {}", repos.len());
     if repos.is_empty() {
         view! {
-        
+            <ReposNotLoaded/>            
         }
     } 
     else {
         view! {
+            <ReposLoaded repos={repos}/>
         }
 
     }
 }
 
-fn get_repos() -> Vec<repo> {
-   let repos = vec![
-        repo {
-            name: "leptos".to_string(),
-            html_url: "www.github.com/sirjudge".to_string()
-        },
-        repo {
-            name: "leptos".to_string(),
-            html_url: "www.github.com/sirjudge".to_string()
-        }
-   ];
+/// Get repos from github api
+fn get_repos() -> Vec<Repo> {
+    // generate hardcoded list
+    let mut repos = Vec::new();
+    let repo1 = Repo {
+        name: RwSignal::new("repo1".to_string()),
+        html_url: RwSignal::new("github.com/sirjudge/repo1".to_string()),
+    };
+    let repo2 = Repo {
+        name: RwSignal::new("repo2".to_string()),
+        html_url: RwSignal::new("github.com/sirjudge/repo2".to_string()),
+    };
+    repos.push(repo1);
+    repos.push(repo2);
+    repos
+
     /* 
     let url = "https://api.github.com/users/nicojudge/repos";
     let request = Request::new(url);
@@ -42,11 +51,11 @@ fn get_repos() -> Vec<repo> {
         .map_err(|_| ());
     let repos = futures::executor::block_on(future);
   */ 
-    repos
 }
 
+/// View for when there are no repos loaded yet
 #[component]
-fn reposNotLoaded() -> impl IntoView {
+fn ReposNotLoaded() -> impl IntoView {
     view! {
         <div id="repos">
             <h1>"Loading Repos..."</h1>
@@ -54,17 +63,25 @@ fn reposNotLoaded() -> impl IntoView {
     }
 }
 
-#[Component]
-fn ReposLoaded(repos: Vec<repo>) -> impl IntoView {
+/// View for when repos are loaded
+#[component]
+fn ReposLoaded(repos: Vec<Repo>) -> impl IntoView {
+    //https://book.leptos.dev/view/04_iteration.html
+    //https://docs.rs/leptos/latest/leptos/fn.For.html
+    // return the view of each repo rendered out
+    let (repo_data, set_repo_data) = create_signal::<Vec<Repo>>(repos);
     view! {
-        <div id="repos">
-            <h1>"These are my repos!"</h1>
-            <p>
-                These are my repos 
-            </p> 
-            <ul>
-                <li>"Fake repo"</li>
-            </ul>
+        <div>
+            <For
+                // function to return items we're iterating over
+                each = move || repo_data.get()
+                key = |repo: &Repo| repo.name.get()
+                children = move |repo : Repo| {
+                    view! {
+                        <li> {repo.name} </li>
+                    }
+                }
+            />
         </div>
     }
 }
