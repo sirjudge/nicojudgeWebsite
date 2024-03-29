@@ -37,7 +37,7 @@ fn HomePage() -> impl IntoView {
             create fast, modern web applications and is deplyoyed and ran on 
             a docker file hosted on a linux server.
         </p>
-        <input::Input/>
+        //<input::Input/>
         <repos::Repos/>
     }
 }

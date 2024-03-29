@@ -4,6 +4,7 @@ use std::clone::Clone;
 #[derive(Copy, Clone, Debug, PartialEq,Eq)]
 struct Repo {
     name: RwSignal<String>,
+    description: RwSignal<String>,
     html_url: RwSignal<String>,
 }
 
@@ -30,27 +31,18 @@ fn get_repos() -> Vec<Repo> {
     // generate hardcoded list
     let mut repos = Vec::new();
     let repo1 = Repo {
-        name: RwSignal::new("repo1".to_string()),
-        html_url: RwSignal::new("github.com/sirjudge/repo1".to_string()),
+        name: RwSignal::new("data_comparison_tool".to_string()),
+        description: RwSignal::new("Tool used to take in large amounts of data and return added, deleted, and changed rows".to_string()),
+        html_url: RwSignal::new("https://github.com/sirjudge/data_comparison_tool".to_string()),
     };
     let repo2 = Repo {
-        name: RwSignal::new("repo2".to_string()),
-        html_url: RwSignal::new("github.com/sirjudge/repo2".to_string()),
+        name: RwSignal::new("PartyApp".to_string()),
+        description: RwSignal::new("C# application built using Avalonia UI framework and .net core web API to create a simple chat application with sqlite backend to store messages".to_string()),
+        html_url: RwSignal::new("https://github.com/sirjudge/PartyApp".to_string()),
     };
     repos.push(repo1);
     repos.push(repo2);
     repos
-
-    /* 
-    let url = "https://api.github.com/users/nicojudge/repos";
-    let request = Request::new(url);
-    let auth_token = format!("bearer {}",std::env!("GITHUB_AUTH_TOKEN"));
-    request.headers().set("Authorization", auth_token);
-    let future = fetch(request)
-        .and_then(|response| response.json::<Vec<repo>>())
-        .map_err(|_| ());
-    let repos = futures::executor::block_on(future);
-  */ 
 }
 
 /// View for when there are no repos loaded yet
@@ -78,7 +70,9 @@ fn ReposLoaded(repos: Vec<Repo>) -> impl IntoView {
                 key = |repo: &Repo| repo.name.get()
                 children = move |repo : Repo| {
                     view! {
-                        <li> {repo.name} </li>
+                        <li> 
+                        {repo.name.get()} - {repo.description.get()} - <a href={repo.html_url.get()}> {repo.html_url.get()} </a>   
+                        </li>
                     }
                 }
             />

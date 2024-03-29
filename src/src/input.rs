@@ -1,5 +1,6 @@
 use leptos::*;
 
+/// default component to demonstrate signals
 #[component]
 pub fn Input() -> impl IntoView {
     // Creates a reactive value to update the button
