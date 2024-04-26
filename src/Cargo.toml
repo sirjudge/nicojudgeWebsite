@@ -17,6 +17,13 @@ leptos_actix = { version = "0.6", optional = true }
 leptos_router = { version = "0.6", features = ["nightly"] }
 wasm-bindgen = "=0.2.91"
 serde = "1.0.197"
+reqwest = { version = "0.12", features = ["json"] }
+#tokio = { version = "1", features = ["full"] }
+async-std = "1.12.0"
+hyper = { version="1.2.0", features = ["full"] }
+#http-body-util = "0.1"
+#hyper-util = { version = "0.1", features = ["full"] }
+#tokio = { version = "1", features = ["full"] }
 
 [features]
 csr = ["leptos/csr", "leptos_meta/csr", "leptos_router/csr"]

@@ -1,8 +1,8 @@
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
-use crate::input;
 use crate::repos;
+use crate::bio;
 
 /// Entry point for the application
 #[component]
@@ -30,14 +30,7 @@ pub fn App() -> impl IntoView {
 #[component]
 fn HomePage() -> impl IntoView {
     view! {
-        <h1>"Welcome!"</h1>
-        <p>
-            Welcome to my website! This website is powered by Leptos, a Rust 
-            web framework that uses WebAssembly and server-side rendering to
-            create fast, modern web applications and is deplyoyed and ran on 
-            a docker file hosted on a linux server.
-        </p>
-        //<input::Input/>
+        <bio::Bio/>
         <repos::Repos/>
     }
 }
