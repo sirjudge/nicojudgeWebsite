@@ -28,7 +28,7 @@
             };
         };
         # Define which tools in the rust tool chain to use
-        rustToolchain = pkgs.rust-bin.stable.latest.default.override {
+        rustToolchain = pkgs.rust-bin.nightly.latest.default.override {
           extensions = [ "rust-src" "rust-analyzer" "clippy" ];
         };
       in {
@@ -41,17 +41,19 @@
             rustToolchain
             clang
             llvmPackages_latest.bintools
+            glibc.dev
+            glib.dev
+            bacon
+            openssl
+            cargo-binstall
             # udev
             # vulkan-loader
             # xorg.libX11
             # xorg.libXcursor
             # xorg.libXi
             # xorg.libXrandr
-            libxkbcommon
             # wayland
-            glibc.dev
-            glib.dev
-            bacon
+            # libxkbcommon
           ];
 
          # The following is executed once after a shell is launched but before
@@ -66,6 +68,7 @@
                 pkgs.wayland
                 pkgs.alsa-lib
                 pkgs.udev
+                pkgs.openssl
               ]
             }:$LD_LIBRARY_PATH;
             export LIBCLANG_PATH="${pkgs.llvmPackages_latest.libclang.lib}/lib";
@@ -73,6 +76,11 @@
             # Set up the build environment
             export BINDGEN_EXTRA_CLANG_ARGS="-I${pkgs.glibc.dev}/include -I${pkgs.llvmPackages_latest.libclang.lib}/lib/clang/${pkgs.llvmPackages_latest.libclang.version}/include -I${pkgs.glib.dev}/include/glib-2.0 -I${pkgs.glib.out}/lib/glib-2.0/include/";
             export RUSTFLAGS="-C link-arg=-fuse-ld=lld";
+
+            # Ensure we're on the nightly build
+            rustup install nightly;
+            rustup override set nightly;
+            rustup target install wasm32-unknown-unknown;
           '';
         };
       });
