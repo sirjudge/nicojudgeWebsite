@@ -13,3 +13,6 @@ pub use bio::Bio;
 
 mod projects_list;
 pub use projects_list::ProjectsList;
+
+mod maintenance_banner;
+pub use maintenance_banner::MaintenanceBanner;

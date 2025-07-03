@@ -2,6 +2,8 @@ use dioxus::prelude::*;
 
 #[component]
 pub fn ProjectsList() -> Element {
+    // TODO: Need to get a list of my github repositories and display them here
+    // based on whatever I've done recently
     rsx! {
         div {
             class: "projects",

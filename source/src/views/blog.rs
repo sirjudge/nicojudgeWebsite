@@ -9,6 +9,8 @@ const BLOG_CSS: Asset = asset!("/assets/styling/blog.css");
 /// re-run and the rendered HTML will be updated.
 #[component]
 pub fn Blog(id: i32) -> Element {
+    //TODO: Should add a dynamic lookup in some kind of db (sqlite fans rise up) to get the blog
+    //post content. Keep it loose for now while building out functionality of the website
     rsx! {
         document::Link { rel: "stylesheet", href: BLOG_CSS }
 

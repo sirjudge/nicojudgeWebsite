@@ -2,6 +2,7 @@
 // need dioxus
 use dioxus::prelude::*;
 
+use components::MaintenanceBanner;
 use views::{Blog, Home, Navbar, Projects};
 
 /// Define a components module that contains all shared components for our app.
@@ -47,12 +48,19 @@ fn main() {
     dioxus::launch(App);
 }
 
-/// App is the main component of our app. Components are the building blocks of dioxus apps. Each component is a function
-/// that takes some props and returns an Element. In this case, App takes no props because it is the root of our app.
-///
-/// Components should be annotated with `#[component]` to support props, better error messages, and autocomplete
+const MAINTENANCE_MODE: bool = false;
+
+/// Main entry point for the application. Checks for if app is in maintenance mode and renders
+/// either the main app or a maintenance banner.
 #[component]
 fn App() -> Element {
+    // if we're in maintenance mode, render a maintenance message instead of the app
+    if MAINTENANCE_MODE {
+        return rsx! {
+           MaintenanceBanner {}
+        };
+    }
+
     // The `rsx!` macro lets us define HTML inside of rust. It expands to an Element with all of our HTML inside.
     rsx! {
         // In addition to element and text (which we will see later), rsx can contain other components. In this case,
