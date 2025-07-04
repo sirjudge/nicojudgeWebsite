@@ -3,9 +3,9 @@ use dioxus::{
     prelude::{server, ServerFnError},
     logger::tracing::{error, info}
 };
+
 use crate::schema::blog_posts;
 use crate::schema::blog_posts::dsl::*;
-
 
 #[derive(Queryable, Insertable,Selectable,Debug, Clone)]
 #[diesel(table_name = blog_posts)]
@@ -40,7 +40,7 @@ impl BlogPost {
             .limit(1)
             .select(BlogPost::as_select())
             .load(&mut connection)
-            .map_err(|e| ServerFnError::new("Error loading blog post"))?;
+            .map_err(|e| ServerFnError::new(format!("Error loading blog post: {e}")))?;
 
         if posts.is_empty() {
             info!("No post found with id: {post_id}");
@@ -49,12 +49,5 @@ impl BlogPost {
 
         info!("Post found with id: {post_id}");
         Ok(posts.into_iter().next())
-    }
-
-    pub fn to_html(&self) -> String {
-        format!(
-            "<h1>{}</h1><p>{}</p>",
-            self.title, self.content
-        )
     }
 }

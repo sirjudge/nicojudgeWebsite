@@ -1,10 +1,10 @@
+use crate::{components::errors::UnexpectedError, models::Repository};
 use dioxus::{
     logger::tracing::{debug, error, info, warn, Level},
     prelude::*,
 };
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
 use serde::{Deserialize, Serialize};
-use crate::models::Repository;
 
 #[component]
 pub fn ProjectTable() -> Element {
@@ -48,7 +48,9 @@ pub fn ProjectsTableBody() -> Element {
                     }
                 }
             },
-            Some(Err(e)) => rsx! { p{ "error:{e}"}},
+            Some(Err(e)) => {
+                UnexpectedError()
+            },
             None => rsx! { p { "Loading . . ."}}
         }
     }

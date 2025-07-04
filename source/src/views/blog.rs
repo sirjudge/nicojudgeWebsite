@@ -1,5 +1,12 @@
-use crate::Route;
-use dioxus::prelude::*;
+use crate::{
+    components::{ResourceNotFound, UnexpectedError},
+    models::BlogPost,
+    Route,
+};
+use dioxus::{
+    logger::tracing::{debug, error, field::debug, info, warn},
+    prelude::*,
+};
 
 const BLOG_CSS: Asset = asset!("/assets/styling/blog.css");
 
@@ -9,33 +16,38 @@ const BLOG_CSS: Asset = asset!("/assets/styling/blog.css");
 /// re-run and the rendered HTML will be updated.
 #[component]
 pub fn Blog(id: i32) -> Element {
-    //TODO: Should add a dynamic lookup in some kind of db (sqlite fans rise up) to get the blog
-    //post content. Keep it loose for now while building out functionality of the website
-    rsx! {
-        document::Link { rel: "stylesheet", href: BLOG_CSS }
-
-        div {
-            id: "blog",
-
-            // Content
-            h1 { "This is blog #{id}!" }
-            p { "In blog #{id}, we show how the Dioxus router works and how URL parameters can be passed as props to our route components." }
-
-            // Navigation links
-            // The `Link` component lets us link to other routes inside our app. It takes a `to` prop of type `Route` and
-            // any number of child nodes.
-            Link {
-                // The `to` prop is the route that the link should navigate to. We can use the `Route` enum to link to the
-                // blog page with the id of -1. Since we are using an enum instead of a string, all of the routes will be checked
-                // at compile time to make sure they are valid.
-                to: Route::Blog { id: id - 1 },
-                "Previous"
-            }
-            span { " <---> " }
-            Link {
-                to: Route::Blog { id: id + 1 },
-                "Next"
-            }
+    debug!("Rendering blog post with id: {id}");
+    match BlogPost::get_post_by_id(id) {
+        // If the post is found, we can render it as HTML
+        Ok(Some(post)) => {
+            debug!("Blog post with id {id} found: {post:?}");
+            return rsx! {
+                // div { id: "blog-post", dangerously_set_inner_html: post.to_html() }
+                div {
+                    class: "blog-post",
+                    id: "blog-post-{id}",
+                    h1 {
+                        class: "blog-post-title",
+                        id: "blog-post-title-{id}",
+                        "{post.title}"
+                    }
+                    p {
+                        class: "blog-post-content",
+                        "{post.content}"
+                    }
+                }
+            };
+        }
+        // If the post is not found, render a "not found" element
+        Ok(None) => {
+            warn!("Blog post with id {id} not found");
+            ResourceNotFound()
+        }
+        // If there was an error getting the post, we can log it and render a generic server error
+        // message
+        Err(e) => {
+            error!("Error getting blog post with id {id}: {e}");
+            UnexpectedError()
         }
     }
 }
