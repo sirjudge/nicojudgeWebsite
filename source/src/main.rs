@@ -1,6 +1,7 @@
+use dioxus::logger;
 // The dioxus prelude contains a ton of common items used in dioxus apps. It's a good idea to import wherever you
 // need dioxus
-use dioxus::prelude::*;
+use dioxus::{logger::tracing::Level, prelude::*};
 
 use components::MaintenanceBanner;
 use views::{Blog, Home, Navbar, Projects};
@@ -43,6 +44,7 @@ const MAIN_CSS: Asset = asset!("/assets/styling/main.css");
 const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
 
 fn main() {
+    logger::init(Level::DEBUG);
     // The `launch` function is the main entry point for a dioxus app. It takes a component and renders it with the platform feature
     // you have enabled
     dioxus::launch(App);
