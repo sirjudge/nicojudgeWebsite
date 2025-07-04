@@ -4,6 +4,7 @@ use dioxus::{
 };
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
 use serde::{Deserialize, Serialize};
+use crate::models::Repository;
 
 #[component]
 pub fn ProjectTable() -> Element {
@@ -51,13 +52,6 @@ pub fn ProjectsTableBody() -> Element {
             None => rsx! { p { "Loading . . ."}}
         }
     }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Repository {
-    name: String,
-    description: Option<String>,
-    pushed_at: String,
 }
 
 #[server]

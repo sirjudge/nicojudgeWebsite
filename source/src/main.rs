@@ -11,6 +11,12 @@ mod components;
 /// Define a views module that contains the UI for all Layouts and Routes for our app.
 mod views;
 
+/// The models module contains all the data structures and logic for our app.
+mod models;
+
+/// Schema module contains the database schema for our app used by diesel.
+mod schema;
+
 /// The Route enum is used to define the structure of internal routes in our app. All route enums need to derive
 /// the [`Routable`] trait, which provides the necessary methods for the router to work.
 ///

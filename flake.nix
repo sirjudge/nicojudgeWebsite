@@ -47,6 +47,7 @@
             bacon
             openssl
             cargo-binstall
+            sqlite
             # udev
             # vulkan-loader
             # xorg.libX11
