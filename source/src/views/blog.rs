@@ -44,13 +44,17 @@ pub fn Blog(id: i32) -> Element {
         // If the post is not found, render a "not found" element
         Ok(None) => {
             warn!("Blog post with id {id} not found");
-            ResourceNotFound()
+            return rsx! {
+                ResourceNotFound {}
+            };
         }
         // If there was an error getting the post, we can log it and render a generic server error
         // message
         Err(e) => {
             error!("Error getting blog post with id {id}: {e}");
-            UnexpectedError()
+            return rsx! {
+                UnexpectedError {}
+            };
         }
     }
 }

@@ -19,3 +19,6 @@ pub use navbar::Navbar;
 
 mod projects;
 pub use projects::Projects;
+
+mod admin;
+pub use admin::Admin;
