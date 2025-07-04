@@ -1,10 +1,6 @@
 use crate::{components::errors::UnexpectedError, models::Repository};
-use dioxus::{
-    logger::tracing::{debug, error, info, warn, Level},
-    prelude::*,
-};
+use dioxus::prelude::*;
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
-use serde::{Deserialize, Serialize};
 
 #[component]
 pub fn ProjectTable() -> Element {
@@ -62,7 +58,9 @@ pub async fn fetch_github_repos() -> Result<Vec<Repository>, ServerFnError> {
     //accessible instead of re-initializing it every time this function is called.
     let client = reqwest::Client::new();
     let mut headers = HeaderMap::new();
-    headers.insert(USER_AGENT, HeaderValue::from_static("rust-app"));
+    // TODO: Just noticed I have this user_agent that makes very little sense, don't think I need
+    // it so commenting out until verify I actually need it
+    // headers.insert(USER_AGENT, HeaderValue::from_static("rust-app"));
     headers.insert(
         AUTHORIZATION,
         HeaderValue::from_str(&format!("Bearer {}", std::env::var("GITHUB_TOKEN")?))?,

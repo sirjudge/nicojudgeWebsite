@@ -1,10 +1,8 @@
-use dioxus::{
-    logger::tracing::{debug, error, info, warn, Level},
-    prelude::*,
-};
+use dioxus::prelude::*;
 
 #[component]
 pub fn UnexpectedError() -> Element {
+    //TODO: Should accept the error as a property and log the error via console
     rsx! {
         div {
             class: "error-page",
@@ -17,6 +15,7 @@ pub fn UnexpectedError() -> Element {
 
 #[component]
 pub fn ResourceNotFound() -> Element {
+    //TODO: Should accept the resource attempted to be reached as a property and log the error via console
     rsx! {
         div {
             class: "resouce-not-found",

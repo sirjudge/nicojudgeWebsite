@@ -1,14 +1,13 @@
 use crate::{
     components::{ResourceNotFound, UnexpectedError},
     models::BlogPost,
-    Route,
 };
 use dioxus::{
-    logger::tracing::{debug, error, field::debug, info, warn},
+    logger::tracing::{debug, error, warn},
     prelude::*,
 };
 
-const BLOG_CSS: Asset = asset!("/assets/styling/blog.css");
+// const BLOG_CSS: Asset = asset!("/assets/styling/blog.css");
 
 /// The Blog page component that will be rendered when the current route is `[Route::Blog]`
 ///
