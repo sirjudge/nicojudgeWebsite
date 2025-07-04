@@ -9,9 +9,8 @@ use serde::{Deserialize, Serialize};
 pub fn ProjectTable() -> Element {
     rsx! {
         div {
-            class: "project-table",
+            class: "projects-table",
             h2 { "Projects" }
-
             table {
                 thead {
                     tr {
@@ -20,23 +19,22 @@ pub fn ProjectTable() -> Element {
                         th { "Last Updated" }
                     }
                 }
-                ProjectsList {}
+                ProjectsTableBody {}
             }
         }
     }
 }
 
 #[component]
-pub fn ProjectsList() -> Element {
-    let repos = use_signal(|| Vec::<Repository>::new());
-    let current_repos = use_resource(move || async move { fetch_github_repos().await });
+pub fn ProjectsTableBody() -> Element {
+    let repo_list = use_resource(move || async move { fetch_github_repos().await });
     rsx! {
-        match &*current_repos.read() {
+        match &*repo_list.read() {
             Some(Ok(repos)) => rsx!{
                 tbody {
                     for repo in repos.iter() {
                         tr {
-                            // class: "repo_item"
+                            class: "repo-row",
                             td { "{repo.name}" }
                             if let Some(desc) = &repo.description {
                                 td { "{desc}" }
@@ -64,6 +62,8 @@ pub struct Repository {
 
 #[server]
 pub async fn fetch_github_repos() -> Result<Vec<Repository>, ServerFnError> {
+    //TODO: Should maybe think about declaring the client outside of this function and having it
+    //accessible instead of re-initializing it every time this function is called.
     let client = reqwest::Client::new();
     let mut headers = HeaderMap::new();
     headers.insert(USER_AGENT, HeaderValue::from_static("rust-app"));
@@ -72,15 +72,14 @@ pub async fn fetch_github_repos() -> Result<Vec<Repository>, ServerFnError> {
         HeaderValue::from_str(&format!("Bearer {}", std::env::var("GITHUB_TOKEN")?))?,
     );
 
+    let git_api_url = "https://api.github.com/user/repos?sort=pushed&direction=desc";
     let repos: Vec<Repository> = client
-        .get("https://api.github.com/user/repos?sort=pushed&direction=desc")
+        .get(git_api_url)
         .headers(headers)
         .send()
         .await?
         .json()
         .await?;
 
-    println!("Fetched {} repositories", repos.len());
-    println!("First repository: {:?}", repos.first());
     Ok(repos)
 }

@@ -1,9 +1,9 @@
-use crate::components::ProjectsList;
+use crate::components::ProjectTable;
 use dioxus::prelude::*;
 
 #[component]
 pub fn Projects() -> Element {
     rsx! {
-        ProjectsList {}
+        ProjectTable {}
     }
 }
