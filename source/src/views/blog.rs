@@ -31,6 +31,9 @@ pub fn Blog(id: i32) -> Element {
                         id: "blog-post-title-{id}",
                         "{post.title}"
                     }
+                    //TODO: this isn't rendering the HTML correctly. I think
+                    //it's just dipslaying the HTML as raw text instead of rednering
+                    //the actual html content
                     p {
                         class: "blog-post-content",
                         "{post.content}"
