@@ -32,6 +32,7 @@ pub fn AdminLogin() -> Element {
                     required: true,
                 }
                 br { }
+                br { }
                 label { "Password:" }
                 br { }
                 input {
@@ -40,6 +41,7 @@ pub fn AdminLogin() -> Element {
                     name: "password",
                     required: true,
                 }
+                br { }
                 //TODO: pass this to a server function and validate the login
                 // and redirect to admin page if successful
                 button {
