@@ -1,4 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+*/target/
+target/*
+
+# env files
+*.env
 
 # dependencies
 /node_modules

@@ -1,0 +1,34 @@
+#navbar {
+  display: flex;
+  flex-direction: row;
+}
+
+#navbar a {
+  color: #ffffff;
+  margin-right: 20px;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+#navbar a:hover {
+  cursor: pointer;
+  color: #91a4d2;
+}
+
+
+/* the following CSS should be for justifying the navbar elements to the left in a group */
+#navbar .left-nav {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-right: auto;
+}
+
+#navbar .right-nav {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-left: auto;
+}
+
+
