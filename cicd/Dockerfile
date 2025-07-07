@@ -1,0 +1,113 @@
+# Dockerfile for Dioxus Fullstack Web Application
+#
+# This Dockerfile builds a production-ready container for a Dioxus fullstack application
+# that includes both client-side WASM components and server-side functionality.
+#
+# Build process:
+# 1. Builder stage: Compiles the Rust server binary and builds the web assets
+# 2. Runtime stage: Creates a minimal container with only the necessary runtime dependencies
+#
+# The application uses:
+# - Dioxus 0.6.x with fullstack features for SSR and client-side hydration
+# - SQLite for database storage
+# - Server functions for API endpoints
+
+# Use the official Rust image as the base
+FROM rust:1.81 AS builder
+
+# Install necessary tools for building
+# - pkg-config: For finding system libraries
+# - libssl-dev: SSL/TLS support for HTTPS requests
+# - sqlite3 & libsqlite3-dev: SQLite database support
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    sqlite3 \
+    libsqlite3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# properly link the sqlite library
+ENV LDFLAGS="-L//usr/bin/sqlite3"
+
+# Install Dioxus CLI with specific version and better error handling
+# Using --locked to ensure reproducible builds
+RUN cargo install dioxus-cli --version 0.6.3 --locked
+
+# Add wasm32 target for web builds
+# Required for client-side WASM compilation
+RUN rustup target add wasm32-unknown-unknown
+
+# Set working directory
+WORKDIR /app
+
+# Copy dependency files first for better Docker layer caching
+# This allows Docker to cache the dependency compilation step
+COPY source/Cargo.toml source/Cargo.lock ./
+COPY source/Dioxus.toml ./
+COPY source/rust-toolchain.toml ./
+COPY source/diesel.toml ./
+
+# Copy source code and assets
+COPY source/src/ ./src/
+COPY source/assets/ ./assets/
+COPY source/migrations/ ./migrations/
+
+# Copy CSS and config files
+COPY source/tailwind.css ./
+COPY source/tailwind.config.js ./
+
+# TODO: This is not the best approach to handle this but
+# it works for now so I'll keep it and revist this problem later
+
+# Copy the database file
+COPY source/main.db ./
+
+# Build the fullstack application (this creates both WASM client and server binary)
+# For Dioxus 0.6.x with fullstack features, we need to build the server binary separately
+# 1. cargo build --release --features server: Builds the server binary with server functions and diesel
+# 2. dx build --release --platform web: Builds the client-side WASM and static assets (without server features)
+RUN cargo build --release --features server
+RUN dx build --release --platform web
+
+# Runtime stage - minimal container for production
+FROM debian:bookworm-slim
+
+# Install runtime dependencies only (no development packages)
+# - sqlite3: SQLite CLI tools
+# - libssl3: SSL/TLS runtime library
+# - libsqlite3-0: SQLite runtime library (not the -dev package)
+# - ca-certificates: For HTTPS certificate validation
+RUN apt-get update && apt-get install -y \
+    sqlite3 \
+    libssl3 \
+    libsqlite3-0 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app user for security (don't run as root)
+RUN useradd -m -u 1001 app
+
+# Set working directory
+WORKDIR /app
+
+# Copy the built application from builder stage
+# For fullstack builds, the server binary is typically in the target directory
+COPY --from=builder /app/target/release/PersonalSite ./PersonalSite
+COPY --from=builder /app/dist/ ./dist/
+COPY --from=builder /app/main.db ./
+
+# Copy assets
+COPY --from=builder /app/assets/ ./assets/
+
+# Change ownership to app user
+RUN chown -R app:app /app
+
+# Switch to app user
+USER app
+
+# Expose port 8080
+EXPOSE 8080
+
+# Run the server binary (for fullstack builds)
+# The server binary serves both the API endpoints and static assets
+CMD ["./PersonalSite"]

@@ -1,6 +1,6 @@
 use crate::{
     components::{ResourceNotFound, UnexpectedError},
-    models::BlogPost,
+    models::{BlogPost, get_blog_post_by_id},
 };
 use dioxus::{
     logger::tracing::{debug, error, warn},
@@ -16,11 +16,14 @@ use dioxus::{
 #[component]
 pub fn Blog(id: i32) -> Element {
     debug!("Rendering blog post with id: {id}");
-    match BlogPost::get_post_by_id(id) {
-        // If the post is found, we can render it as HTML
-        Ok(Some(post)) => {
+    
+    // Use use_resource to call the server function
+    let post_resource = use_resource(move || get_blog_post_by_id(id));
+    
+    match &*post_resource.read() {
+        Some(Ok(Some(post))) => {
             debug!("Blog post with id {id} found: {post:?}");
-            return rsx! {
+            rsx! {
                 // div { id: "blog-post", dangerously_set_inner_html: post.to_html() }
                 div {
                     class: "blog-post",
@@ -38,22 +41,28 @@ pub fn Blog(id: i32) -> Element {
                         "{post.content}"
                     }
                 }
-            };
+            }
         }
-        // If the post is not found, render a "not found" element
-        Ok(None) => {
+        Some(Ok(None)) => {
             warn!("Blog post with id {id} not found");
-            return rsx! {
+            rsx! {
                 ResourceNotFound {}
-            };
+            }
         }
-        // If there was an error getting the post, we can log it and render a generic server error
-        // message
-        Err(e) => {
+        Some(Err(e)) => {
             error!("Error getting blog post with id {id}: {e}");
-            return rsx! {
+            rsx! {
                 UnexpectedError {}
-            };
+            }
+        }
+        None => {
+            debug!("Loading blog post with id {id}");
+            rsx! {
+                div {
+                    class: "loading",
+                    p { "Loading blog post..." }
+                }
+            }
         }
     }
 }

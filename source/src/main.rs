@@ -15,6 +15,8 @@ mod views;
 mod models;
 
 /// Schema module contains the database schema for our app used by diesel.
+/// Only included for server builds.
+#[cfg(feature = "server")]
 mod schema;
 
 /// The Route enum is used to define the structure of internal routes in our app. All route enums need to derive
