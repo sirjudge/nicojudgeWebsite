@@ -24,6 +24,11 @@ pub fn Navbar() -> Element {
                 "Blog"
             }
             Link {
+                align_content: "right",
+                to: Route::Admin {},
+                "Admin"
+            }
+            Link {
                 to: Route::Projects {},
                 "Projects List"
             }

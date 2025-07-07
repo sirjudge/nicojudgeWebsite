@@ -12,7 +12,6 @@ pub fn AdminView() -> Element {
             p { "This is the admin page for managing the application." }
             MaintenanceSettings {}
             NewEditBlog {}
-
         }
     }
 }
@@ -24,12 +23,17 @@ pub fn AdminLogin() -> Element {
             class: "admin-login",
             h1 { "Admin Login" }
             form {
+                label { "Username:" }
+                br { }
                 input {
                     r#type: "text",
                     placeholder: "Username",
                     name: "username",
                     required: true,
                 }
+                br { }
+                label { "Password:" }
+                br { }
                 input {
                     r#type: "password",
                     placeholder: "Password",
