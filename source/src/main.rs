@@ -4,7 +4,7 @@ use dioxus::logger;
 use dioxus::{logger::tracing::Level, prelude::*};
 
 use components::MaintenanceBanner;
-use views::{Blog, Home, Navbar, Projects, Admin};
+use views::{Admin, Blog, Home, Navbar, Projects};
 
 /// Define a components module that contains all shared components for our app.
 mod components;

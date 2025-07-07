@@ -6,8 +6,13 @@ pub fn Bio() -> Element {
         div {
             class: "bio",
             h2 { "About Me" }
-            p { "Hello! I'm a software developer with a passion for building web applications. I love working with Rust and Dioxus to create fast and efficient user interfaces." }
-            p { "In my free time, I enjoy hiking, reading, and exploring new technologies." }
+            p { "
+                Hello! I'm a fullstack software engineer with nearly a decade in
+                building high performant web applications, services, and tooling for
+                nearly a decade. The page you're viewing right now is built from
+                the ground up with Rust and Dioxus, a modern web framework that
+                allows for building fast and efficient web applications with
+                the power of WASM" }
         }
     }
 }

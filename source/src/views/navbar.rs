@@ -15,22 +15,29 @@ pub fn Navbar() -> Element {
 
         div {
             id: "navbar",
-            Link {
-                to: Route::Home {},
-                "Home"
+            div{
+                id: "left-nav",
+                class: "left-nav",
+                Link {
+                    to: Route::Home {},
+                    "Home"
+                }
+                Link {
+                    to: Route::Blog { id: 1 },
+                    "Blog"
+                }
+                Link {
+                    to: Route::Projects {},
+                    "Projects List"
+                }
             }
-            Link {
-                to: Route::Blog { id: 1 },
-                "Blog"
-            }
-            Link {
-                align_content: "right",
-                to: Route::Admin {},
-                "Admin"
-            }
-            Link {
-                to: Route::Projects {},
-                "Projects List"
+            div{
+                id: "right-nav",
+                class: "right-nav",
+                Link {
+                    to: Route::Admin {},
+                    "Admin"
+                }
             }
         }
 
