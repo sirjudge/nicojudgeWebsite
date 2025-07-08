@@ -40,7 +40,7 @@ check_directory() {
 build_production() {
     check_directory
     print_step "Building production Docker image..."
-    if docker build -f cicd/Dockerfile -t dioxus-web:latest .; then
+    if docker build -f cicd/Dockerfile -t dioxus-web:latest --progress=plain .; then
         print_step "Production image built successfully!"
     else
         print_error "Failed to build production image"
