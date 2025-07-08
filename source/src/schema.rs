@@ -1,6 +1,5 @@
-// @generated automatically by Diesel CLI.
 
-#[cfg(feature = "server")]
+// @generated automatically by Diesel CLI.
 diesel::table! {
     blog_posts (id) {
         id -> Nullable<Integer>,

@@ -1,7 +1,8 @@
 use crate::{
     components::{ResourceNotFound, UnexpectedError},
-    models::{BlogPost, get_blog_post_by_id},
+    models::get_post_by_id,
 };
+
 use dioxus::{
     logger::tracing::{debug, error, warn},
     prelude::*,
@@ -16,11 +17,11 @@ use dioxus::{
 #[component]
 pub fn Blog(id: i32) -> Element {
     debug!("Rendering blog post with id: {id}");
-    
+
     // Use use_resource to call the server function
-    let post_resource = use_resource(move || get_blog_post_by_id(id));
-    
-    match &*post_resource.read() {
+    let post_resource = use_resource(move || async move { get_post_by_id(id).await });
+    let post_data = post_resource.read();
+    match post_data.as_ref() {
         Some(Ok(Some(post))) => {
             debug!("Blog post with id {id} found: {post:?}");
             rsx! {
