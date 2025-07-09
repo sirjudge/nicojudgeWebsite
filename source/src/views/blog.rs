@@ -1,14 +1,33 @@
 use crate::{
     components::{ResourceNotFound, UnexpectedError},
-    models::get_post_by_id,
+    models::{get_post_by_id, BlogPostModel},
 };
 
 use dioxus::{
-    logger::tracing::{debug, error, warn},
+    logger::tracing::{debug, error, field::debug, warn},
     prelude::*,
 };
 
 // const BLOG_CSS: Asset = asset!("/assets/styling/blog.css");
+
+
+pub async fn get_blog_model(post_id: i32) -> Option<BlogPostModel> {
+    match get_post_by_id(post_id).await {
+        Ok(Some(post)) => {
+            debug!("Blog post with id {post_id} found: {post:?}");
+            Some(post.to_model())
+        }
+        Ok(None) => {
+            warn!("Blog post with id {post_id} not found");
+            None
+        }
+        Err(e) => {
+            error!("Error fetching blog post with id {post_id}: {e}");
+            None
+        }
+    }
+}
+
 
 /// The Blog page component that will be rendered when the current route is `[Route::Blog]`
 ///
@@ -19,11 +38,9 @@ pub fn Blog(id: i32) -> Element {
     debug!("Rendering blog post with id: {id}");
 
     // Use use_resource to call the server function
-    let post_resource = use_resource(move || async move { get_post_by_id(id).await });
-    let post_data = post_resource.read();
-    match post_data.as_ref() {
-        Some(Ok(Some(post))) => {
-            debug!("Blog post with id {id} found: {post:?}");
+    let post_resource = use_resource(move || async move { get_blog_model(id).await });
+    let x = match &*post_resource.read() {
+        Some(Some(post)) => {
             rsx! {
                 // div { id: "blog-post", dangerously_set_inner_html: post.to_html() }
                 div {
@@ -44,16 +61,10 @@ pub fn Blog(id: i32) -> Element {
                 }
             }
         }
-        Some(Ok(None)) => {
+        Some(None) => {
             warn!("Blog post with id {id} not found");
             rsx! {
                 ResourceNotFound {}
-            }
-        }
-        Some(Err(e)) => {
-            error!("Error getting blog post with id {id}: {e}");
-            rsx! {
-                UnexpectedError {}
             }
         }
         None => {
@@ -65,5 +76,5 @@ pub fn Blog(id: i32) -> Element {
                 }
             }
         }
-    }
+    }; x
 }
