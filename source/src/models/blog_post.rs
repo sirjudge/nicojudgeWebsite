@@ -4,8 +4,11 @@ use dioxus::{
     prelude::*,
     logger::tracing::{error, info}
 };
+#[cfg(feature = "server")]
 use crate::schema::blog_posts;
+#[cfg(feature = "server")]
 use crate::schema::blog_posts::dsl::*;
+#[cfg(feature = "server")]
 use diesel::{SqliteConnection,prelude::*};
 
 
@@ -20,10 +23,10 @@ pub struct BlogPostModel {
     pub content: String
 }
 
-#[derive(Serialize, Deserialize)]
-#[derive(Queryable, Insertable,Selectable,Debug, Clone)]
-#[diesel(table_name = blog_posts)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "server", derive(Queryable, Insertable, Selectable))]
+#[cfg_attr(feature = "server", diesel(table_name = blog_posts))]
+#[cfg_attr(feature = "server", diesel(check_for_backend(diesel::sqlite::Sqlite)))]
 pub struct BlogPost {
     pub id: Option<i32>,
     pub title: String,

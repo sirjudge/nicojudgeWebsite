@@ -952,7 +952,6 @@ dependencies = [
  "dioxus-html",
  "dioxus-liveview",
  "dioxus-logger",
- "dioxus-mobile",
  "dioxus-router",
  "dioxus-signals",
  "dioxus-ssr",
@@ -1137,7 +1136,6 @@ dependencies = [
  "dioxus-interpreter-js",
  "dioxus-isrg",
  "dioxus-lib",
- "dioxus-mobile",
  "dioxus-ssr",
  "dioxus-web",
  "dioxus_server_macro",
@@ -1318,20 +1316,6 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "tracing-wasm",
-]
-
-[[package]]
-name = "dioxus-mobile"
-version = "0.6.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d1295388909f427758993f32a571e0f8698d6ce0f125fa0e81b8bfdec3fa952"
-dependencies = [
- "dioxus-cli-config",
- "dioxus-desktop",
- "dioxus-lib",
- "jni",
- "libc",
- "once_cell",
 ]
 
 [[package]]
@@ -5489,6 +5473,7 @@ version = "0.1.0"
 dependencies = [
  "diesel",
  "dioxus",
+ "dioxus-cli-config",
  "reqwest 0.11.27",
  "serde",
  "serde_json",

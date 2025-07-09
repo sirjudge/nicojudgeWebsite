@@ -63,13 +63,6 @@ run_production() {
     fi
 }
 
-# Function to run development environment
-run_development() {
-    check_directory
-    print_step "Starting development environment..."
-    cd cicd && docker-compose --profile dev up --build web-dev
-}
-
 # Function to stop containers
 stop_containers() {
     print_step "Stopping containers..."
@@ -97,9 +90,6 @@ case "${1:-}" in
         build_production
         run_production
         ;;
-    "dev")
-        run_development
-        ;;
     "stop")
         stop_containers
         ;;
@@ -115,7 +105,6 @@ case "${1:-}" in
         echo "Commands:"
         echo "  build  - Build the production Docker image"
         echo "  run    - Build and run the production container"
-        echo "  dev    - Start development environment with hot reload"
         echo "  stop   - Stop all running containers"
         echo "  clean  - Remove all containers and images"
         echo "  logs   - Show container logs"

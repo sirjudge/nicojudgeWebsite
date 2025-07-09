@@ -1,24 +1,14 @@
 # Dockerfile for Dioxus Fullstack Web Application
-#
 # This Dockerfile builds a production-ready container for a Dioxus fullstack application
 # that includes both client-side WASM components and server-side functionality.
-#
 # Build process:
 # 1. Builder stage: Compiles the Rust server binary and builds the web assets
 # 2. Runtime stage: Creates a minimal container with only the necessary runtime dependencies
-#
-# The application uses:
-# - Dioxus 0.6.x with fullstack features for SSR and client-side hydration
-# - SQLite for database storage
-# - Server functions for API endpoints
 
 # Use the official Rust image as the base
 FROM rust:1.81 AS builder
 
 # Install necessary tools for building
-# - pkg-config: For finding system libraries
-# - libssl-dev: SSL/TLS support for HTTPS requests
-# - sqlite3 & libsqlite3-dev: SQLite database support
 RUN apt-get update && apt-get install -y \
     pkg-config \
     sqlite3 \
@@ -27,13 +17,9 @@ RUN apt-get update && apt-get install -y \
     libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# properly link the sqlite library
-ENV LDFLAGS="-L//usr/bin/sqlite3"
 
-# TODO: Somewhere suggeted pinning the latest version of dioxus-cli, just using
-#the latest for now
-# Install Dioxus CLI with specific version and better error handling
-# Using --locked to ensure reproducible builds
+# Install locked version of dioxus CLI so we don't accidentally break
+# it during an update
 RUN cargo install dioxus-cli --version 0.6.3 --locked
 
 # Add wasm32 target for web builds
@@ -65,20 +51,18 @@ COPY source/tailwind.config.js ./
 COPY source/main.db ./
 
 # Build the fullstack application (this creates both WASM client and server binary)
-# For Dioxus 0.6.x with fullstack features, we need to build the server binary separately
+# For Dioxus 0.6.x with fullstack features:
 # 1. cargo build --release --features server: Builds the server binary with server functions and diesel
-# 2. dx build --release --platform web: Builds the client-side WASM and static assets (without server features)
- RUN cargo build --release --features server
-RUN dx bundle --platform web
+# 2. dx bundle --platform web --features web --no-default-features: Builds the client-side WASM, static assets, and fullstack server binary
+#    - Creates server binary at: /app/target/dx/web/release/web/server
+#    - Creates static assets at: /app/target/dx/web/release/web/public/
+RUN cargo build --release --features server
+RUN dx bundle --platform web --features web --no-default-features
 
 # Runtime stage - minimal container for production
 FROM debian:bookworm-slim
 
 # Install runtime dependencies only (no development packages)
-# - sqlite3: SQLite CLI tools
-# - libssl3: SSL/TLS runtime library
-# - libsqlite3-0: SQLite runtime library (not the -dev package)
-# - ca-certificates: For HTTPS certificate validation
 RUN apt-get update && apt-get install -y \
     sqlite3 \
     libssl3 \
@@ -93,9 +77,9 @@ RUN useradd -m -u 1001 app
 WORKDIR /app
 
 # Copy the built application from builder stage
-# For fullstack builds, the server binary is typically in the target directory
-COPY --from=builder /app/target/release/PersonalSite ./PersonalSite
-COPY --from=builder /app/dist/ ./dist/
+# For fullstack builds, the dx bundle command creates a server binary and public assets
+COPY --from=builder /app/target/dx/web/release/web/server ./PersonalSite
+COPY --from=builder /app/target/dx/web/release/web/public/ ./dist/
 COPY --from=builder /app/main.db ./
 
 # Copy assets

@@ -9,6 +9,7 @@ pub mod models;
 
 /// Schema module contains the database schema for our app used by diesel.
 /// Only included for server builds.
+#[cfg(feature = "server")]
 pub mod schema;
 
 pub mod route;

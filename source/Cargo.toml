@@ -8,20 +8,22 @@ edition = "2021"
 
 [dependencies]
 dioxus = { version = "0.6.0", features = ["router", "fullstack"] }
+# CLI configuration for getting the correct server address
+dioxus-cli-config = "0.6.0"
 reqwest = { version = "0.11", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-diesel = { version = "2.2.11", features = ["sqlite"] }
+# Only include diesel for server builds, not for web/WASM builds
+diesel = { version = "2.2.11", features = ["sqlite"], optional = true }
 
 [features]
 default = ["web"]
-# The feature that are only required for the web = ["dioxus/web"] build target should be optional and only enabled in the web = ["dioxus/web"] feature
+# The feature that are only required for the web build target should be optional and only enabled in the web feature
 web = ["dioxus/web"]
-# The feature that are only required for the desktop = ["dioxus/desktop"] build target should be optional and only enabled in the desktop = ["dioxus/desktop"] feature
+# The feature that are only required for the desktop build target should be optional and only enabled in the desktop feature
 desktop = ["dioxus/desktop"]
-# The feature that are only required for the mobile = ["dioxus/mobile"] build target should be optional and only enabled in the mobile = ["dioxus/mobile"] feature
-mobile = ["dioxus/mobile"]
-server = ["dioxus/server"]
+# The feature that are only required for the server build target should be optional and only enabled in the server feature
+server = ["dioxus/server", "diesel"]
 
 [build]
 jobs = 2
