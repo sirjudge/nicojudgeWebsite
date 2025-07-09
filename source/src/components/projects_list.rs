@@ -1,5 +1,5 @@
 use crate::{components::errors::UnexpectedError, models::Repository};
-use dioxus::{prelude::*, logger::tracing::error};
+use dioxus::{logger::tracing::error, prelude::{server_fn::response, *}};
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
 
 #[component]
@@ -63,7 +63,7 @@ pub async fn fetch_github_repos() -> Result<Vec<Repository>, ServerFnError> {
     let mut headers = HeaderMap::new();
     // TODO: Just noticed I have this user_agent that makes very little sense, don't think I need
     // it so commenting out until verify I actually need it
-    // headers.insert(USER_AGENT, HeaderValue::from_static("rust-app"));
+    headers.insert(USER_AGENT, HeaderValue::from_static("rust-app"));
     headers.insert(
         AUTHORIZATION,
         HeaderValue::from_str(&format!("Bearer {}", std::env::var("GITHUB_TOKEN")?))?,
