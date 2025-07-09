@@ -1,5 +1,5 @@
 use crate::{components::errors::UnexpectedError, models::Repository};
-use dioxus::prelude::*;
+use dioxus::{prelude::*, logger::tracing::error};
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
 
 #[component]
@@ -45,7 +45,10 @@ pub fn ProjectsTableBody() -> Element {
                 }
             },
             Some(Err(e)) => {
-                UnexpectedError()
+                // UnexpectedError()
+                rsx! {
+                    p { "Error: {e}" }
+                }
             },
             None => rsx! { p { "Loading . . ."}}
         }
@@ -67,13 +70,24 @@ pub async fn fetch_github_repos() -> Result<Vec<Repository>, ServerFnError> {
     );
 
     let git_api_url = "https://api.github.com/user/repos?sort=pushed&direction=desc";
-    let repos: Vec<Repository> = client
+
+    match client
         .get(git_api_url)
         .headers(headers)
         .send()
-        .await?
-        .json()
-        .await?;
-
-    Ok(repos)
+        .await {
+            Ok(response) => {
+                if response.status().is_success() {
+                    match response.json::<Vec<Repository>>().await {
+                        Ok(repos) => Ok(repos),
+                        Err(e) => Err(ServerFnError::new(e.to_string())),
+                    }
+                }
+                else {
+                    error!("Failed to fetch repositories: {}", response.status());
+                    Err(ServerFnError::new(format!("Failed to fetch repositories: {}",response.status())))
+                }
+            },
+            Err(e) => Err(ServerFnError::new(e.to_string())),
+    }
 }
