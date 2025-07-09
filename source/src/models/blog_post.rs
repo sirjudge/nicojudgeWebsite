@@ -1,13 +1,15 @@
-// use serde::{Deserialize, Serialize};
 use diesel::{SqliteConnection,prelude::*};
+use serde::{Serialize, Deserialize};
 use dioxus::{
-    prelude::{server, ServerFnError},
+    // prelude::{server, ServerFnError},
+    prelude::*,
     logger::tracing::{error, info}
 };
 
 use crate::schema::blog_posts;
 use crate::schema::blog_posts::dsl::*;
 
+#[derive(Serialize, Deserialize)]
 #[derive(Queryable, Insertable,Selectable,Debug, Clone)]
 #[diesel(table_name = blog_posts)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
@@ -17,6 +19,8 @@ pub struct BlogPost {
     pub content: String,
 }
 
+
+#[server]
 pub async fn get_post_by_id(post_id: i32) -> Result<Option<BlogPost>, ServerFnError> {
     let mut connection = establish_connection().unwrap();
     info!("Connected to db successfully, extracting post with id: {post_id}");

@@ -7,14 +7,13 @@ RUN echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf
 # Set the working directory for the application
 WORKDIR /app
 
-ENV CARGO_TARGET_DIR=/usr/local/tmp
-ENV CARGO_INSTALL_ROOT=/usr/local
-
 # Copy the entire source code (the flake needs access to the source directory)
 COPY . .
 
 # Create the directory for a cargo build folder
 RUN mkdir -p /build/cargo
+RUN mkdir -p /build/tmp
+RUN mkdir -p /build/local
 
 # Build the application using the Nix flake
 RUN nix build

@@ -29,7 +29,7 @@ print_error() {
 
 # Check if we're in the right directory
 check_directory() {
-    if [ ! -d "cicd" ] || [ ! -f "cicd/Dockerfile" ]; then
+    if [ ! -d "cicd" ] || [ ! -f "cicd/Dockerfile.debian" ]; then
         print_error "This script must be run from the project root directory"
         print_error "Make sure you're in the directory containing the 'cicd' folder"
         exit 1
@@ -40,7 +40,7 @@ check_directory() {
 build_production() {
     check_directory
     print_step "Building production Docker image..."
-    if docker build -f cicd/Dockerfile -t dioxus-web:latest --progress=plain .; then
+    if docker build -f cicd/Dockerfile.debian -t dioxus-web:latest --progress=plain .; then
         print_step "Production image built successfully!"
     else
         print_error "Failed to build production image"

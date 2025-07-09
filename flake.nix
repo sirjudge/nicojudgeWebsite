@@ -1,5 +1,5 @@
 {
-  description = "Bevy Development environment";
+  description = "A nix flake for a rust development environment with dioxus WASM and sqlite support";
 
   inputs = {
     # Retrieve current Nixpkgs unstable channel
@@ -29,96 +29,10 @@
 
         # Define which tools in the rust tool chain to use
         rustToolchain = pkgs.rust-bin.stable.latest.default.override {
-          extensions = [ "rust-src" "rust-analyzer" "clippy" ];
+          extensions = [ "rust-src" "clippy" ];
           targets = [ "wasm32-unknown-unknown" ];
         };
       in {
-
-        # Define the default package for building the application
-        packages.default = pkgs.stdenv.mkDerivation {
-          pname = "dioxus-web";
-          version = "0.6.3";
-          src = ./.;
-          nativeBuildInputs = with pkgs; [
-            pkg-config
-            rustToolchain
-            clang
-            llvmPackages_latest.bintools
-            cargo-binstall
-            nodejs
-            nodePackages.npm
-          ];
-
-          buildInputs = with pkgs; [
-            glibc.dev
-            glib.dev
-            openssl
-            sqlite
-            vulkan-loader
-            libxkbcommon
-            wayland
-            alsa-lib
-            udev
-          ];
-
-          buildPhase = ''
-            export CARGO_HOME=$TMPDIR/cargo
-            export PATH=$PATH:$CARGO_HOME/bin
-
-            mkdir -p CARGO_INSTALL_ROOT
-            mkdir -p CARGO_TARGET_DIR
-
-            # Set up custom directory paths for cargo build + install
-            export CARGO_TARGET_DIR=/usr/local/tmp
-            export CARGO_INSTALL_ROOT=/usr/local
-
-            # Set up environment variables for building
-            export LIBCLANG_PATH="${pkgs.llvmPackages_latest.libclang.lib}/lib"
-            export BINDGEN_EXTRA_CLANG_ARGS="-I${pkgs.glibc.dev}/include -I${pkgs.llvmPackages_latest.libclang.lib}/lib/clang/${pkgs.llvmPackages_latest.libclang.version}/include -I${pkgs.glib.dev}/include/glib-2.0 -I${pkgs.glib.out}/lib/glib-2.0/include/"
-            export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath [
-              pkgs.vulkan-loader
-              pkgs.libxkbcommon
-              pkgs.wayland
-              pkgs.alsa-lib
-              pkgs.udev
-              pkgs.openssl
-            ]}:$LD_LIBRARY_PATH
-
-            # Set up database URL for build
-            export DATABASE_URL="sqlite:main.db"
-
-            # Install dioxus-cli
-            cargo install dioxus-cli --version 0.6.3 --locked
-
-            # Build the fullstack application
-            cd source
-
-            # Build the web assets
-            dx build --release --platform web
-          '';
-
-          installPhase = ''
-            mkdir -p $out/bin
-            mkdir -p $out/share/dioxus-web
-
-            # Copy the server binary
-            cp source/target/release/source $out/bin/dioxus-web
-
-            # Copy the web assets
-            cp -r source/dist/* $out/share/dioxus-web/
-
-            # Copy the database file if it exists
-            if [ -f source/main.db ]; then
-              cp source/main.db $out/share/dioxus-web/
-            fi
-
-            # Copy any other necessary files
-            if [ -f source/Dioxus.toml ]; then
-              cp source/Dioxus.toml $out/share/dioxus-web/
-            fi
-          '';
-        };
-
         # Load packages used for build time
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [ pkg-config ];
@@ -126,6 +40,7 @@
             # Build dependencies
             rustup
             rustToolchain
+            rust-analyzer # Add this line
             clang
             llvmPackages_latest.bintools
             glibc.dev
@@ -156,6 +71,8 @@
 
             # Set up the build environment
             export BINDGEN_EXTRA_CLANG_ARGS="-I${pkgs.glibc.dev}/include -I${pkgs.llvmPackages_latest.libclang.lib}/lib/clang/${pkgs.llvmPackages_latest.libclang.version}/include -I${pkgs.glib.dev}/include/glib-2.0 -I${pkgs.glib.out}/lib/glib-2.0/include/";
+
+            rustup component add rust-analyzer
 
             # Start ZSH shell instead of bash shell
             zsh

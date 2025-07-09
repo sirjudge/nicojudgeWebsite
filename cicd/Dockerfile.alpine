@@ -1,0 +1,51 @@
+FROM alpine:3.14 as builder
+RUN apk add --no-cache \
+    cargo \
+    rust \
+    curl
+    pkg-config \
+    sqlite3 \
+    sqlite-dev\
+    sqlite-libs \
+    libssl3 \
+    libssl-dev \
+    libsqlite3-dev \
+
+ENV LDFLAGS="-L//usr/bin/sqlite3"
+RUN cargo install dioxus-cli --version 0.6.3 --locked
+
+# Add wasm32 target for web builds
+# Required for client-side WASM compilation
+RUN rustup target add wasm32-unknown-unknown
+
+# Set working directory
+WORKDIR /app
+
+# Copy dependency files first for better Docker layer caching
+# This allows Docker to cache the dependency compilation step
+COPY source/Cargo.toml source/Cargo.lock ./
+COPY source/Dioxus.toml ./
+COPY source/rust-toolchain.toml ./
+COPY source/diesel.toml ./
+
+# Copy source code and assets
+COPY source/src/ ./src/
+COPY source/assets/ ./assets/
+COPY source/migrations/ ./migrations/
+
+# Copy CSS and config files
+COPY source/tailwind.css ./
+COPY source/tailwind.config.js ./
+
+# TODO: This is not the best approach to handle this but
+# it works for now so I'll keep it and revist this problem later
+# Copy the database file
+COPY source/main.db ./
+
+# Build the fullstack application (this creates both WASM client and server binary)
+# For Dioxus 0.6.x with fullstack features, we need to build the server binary separately
+# 1. cargo build --release --features server: Builds the server binary with server functions and diesel
+# 2. dx build --release --platform web: Builds the client-side WASM and static assets (without server features)
+# RUN cargo build --release --features server
+# RUN dx build --release --platform web
+RUN dx bundle --platform web
