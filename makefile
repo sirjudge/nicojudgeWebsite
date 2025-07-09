@@ -1,6 +1,8 @@
-build-container: ## Build the container image
+build-container:
 	bash cicd/build.sh build
 
-serve-local: ## Build the container image
+serve-local:
 	dx serve
 
+docker-clean:
+	docker prune -a --volumes

@@ -1,13 +1,12 @@
-use diesel::{SqliteConnection,prelude::*};
 use serde::{Serialize, Deserialize};
 use dioxus::{
     // prelude::{server, ServerFnError},
     prelude::*,
     logger::tracing::{error, info}
 };
-
 use crate::schema::blog_posts;
 use crate::schema::blog_posts::dsl::*;
+use diesel::{SqliteConnection,prelude::*};
 
 #[derive(Serialize, Deserialize)]
 #[derive(Queryable, Insertable,Selectable,Debug, Clone)]
@@ -22,7 +21,19 @@ pub struct BlogPost {
 
 #[server]
 pub async fn get_post_by_id(post_id: i32) -> Result<Option<BlogPost>, ServerFnError> {
-    let mut connection = establish_connection().unwrap();
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+
+    let connection = match SqliteConnection::establish(&database_url)
+        .map_err(|_| ServerFnError::new("Failed to connect to the database")) {
+        Ok(mut connection) => {
+            info!("Successfully connected to the database");
+            connection
+        },
+        Err(e) => {
+            return Err(ServerFnError::new(format!("Database connection error: {e}")));
+        }
+    };
+
     info!("Connected to db successfully, extracting post with id: {post_id}");
 
     let posts = blog_posts
@@ -39,10 +50,4 @@ pub async fn get_post_by_id(post_id: i32) -> Result<Option<BlogPost>, ServerFnEr
 
     info!("Post found with id: {post_id}");
     Ok(posts.into_iter().next())
-}
-
-pub fn establish_connection() -> Result<SqliteConnection, ServerFnError> {
-    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    SqliteConnection::establish(&database_url)
-        .map_err(|_| ServerFnError::new("Failed to connect to the database"))
 }
