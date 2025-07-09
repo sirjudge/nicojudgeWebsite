@@ -61,9 +61,10 @@ pub async fn fetch_github_repos() -> Result<Vec<Repository>, ServerFnError> {
     //accessible instead of re-initializing it every time this function is called.
     let client = reqwest::Client::new();
     let mut headers = HeaderMap::new();
-    // TODO: Just noticed I have this user_agent that makes very little sense, don't think I need
-    // it so commenting out until verify I actually need it
-    headers.insert(USER_AGENT, HeaderValue::from_static("rust-app"));
+    //NOTE: I need this user agent header to work to avoid 403 errors
+    //but also wondering if it has to be rust-app or if it can be whatever I want
+    // headers.insert(USER_AGENT, HeaderValue::from_static("rust-app"));
+    headers.insert(USER_AGENT, HeaderValue::from_static("nicojudge.com"));
     headers.insert(
         AUTHORIZATION,
         HeaderValue::from_str(&format!("Bearer {}", std::env::var("GITHUB_TOKEN")?))?,
