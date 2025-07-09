@@ -7,8 +7,14 @@ RUN echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf
 # Set the working directory for the application
 WORKDIR /app
 
+ENV CARGO_TARGET_DIR=/usr/local/tmp
+ENV CARGO_INSTALL_ROOT=/usr/local
+
 # Copy the entire source code (the flake needs access to the source directory)
 COPY . .
+
+# Create the directory for a cargo build folder
+RUN mkdir -p /build/cargo
 
 # Build the application using the Nix flake
 RUN nix build
@@ -25,6 +31,8 @@ COPY --from=builder /app/result /app/result
 # Set up environment variables
 ENV DATABASE_URL="sqlite:/app/result/share/dioxus-web/main.db"
 ENV RUST_LOG="info"
+ENV CARGO_TARGET_DIR=/usr/local/tmp
+ENV CARGO_INSTALL_ROOT=/usr/local
 
 # Expose port 8080
 EXPOSE 8080
