@@ -50,13 +50,15 @@ fn main() {
     LaunchBuilder::new()
         // Only set the server config if the server feature is enabled
         .with_cfg(server_only! {
-            // ServeConfigBuilder::default().root_id("app")
-            ServeConfigBuilder::default().root_id("app")
+            ServeConfigBuilder::default()
+                .root_id("app")
         })
         // You also need to set the root id in your web config
         .with_cfg(web! {
             dioxus::web::Config::default().rootname("app")
         })
+        //NOTE: Don't need this as we aren't serving a desktop application at
+        //the moment, it just be fullstack/server + web
         // And desktop config
         // .with_cfg(desktop! {
         //     dioxus::desktop::Config::default().with_root_name("app")
