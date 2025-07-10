@@ -9,6 +9,8 @@ services:
       - "8080:8080"
     environment:
       - RUST_LOG=info
+      - PORT=8080
+      - IP=0.0.0.0
     volumes:
       # Mount the database file for persistence
       - ../source/main.db:/app/main.db
@@ -26,5 +28,7 @@ services:
       - /app/target
     environment:
       - RUST_LOG=debug
+      - PORT=8080
+      - IP=0.0.0.0
     profiles:
       - dev 

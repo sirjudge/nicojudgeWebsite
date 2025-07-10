@@ -54,6 +54,8 @@ run_production() {
     if docker run -d \
         --name dioxus-web \
         -p 8080:8080 \
+        -e PORT=8080 \
+        -e IP=0.0.0.0 \
         --rm \
         dioxus-web:latest; then
         print_step "Production container is running at http://localhost:8080"

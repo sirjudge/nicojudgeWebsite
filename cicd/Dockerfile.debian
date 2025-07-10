@@ -5,6 +5,14 @@
 # 1. Builder stage: Compiles the Rust server binary and builds the web assets
 # 2. Runtime stage: Creates a minimal container with only the necessary runtime dependencies
 
+# PORT CONFIGURATION:
+# - Dioxus fullstack applications default to port 3000 when using dioxus_cli_config::fullstack_address_or_localhost()
+# - For Docker deployment, we override this with environment variables:
+#   * PORT=8080: Sets the port the server listens on
+#   * IP=0.0.0.0: Allows external connections (required for Docker containers)
+# - The Docker container exposes port 8080 and maps it to the host
+# - This ensures the application is accessible from outside the container
+
 # Use the official Rust image as the base
 FROM rust:1.81 AS builder
 
@@ -90,6 +98,12 @@ RUN chown -R app:app /app
 
 # Switch to app user
 USER app
+
+# Set environment variables for Dioxus server configuration
+# PORT: The port the server should listen on (matches Docker EXPOSE)
+# IP: The IP address to bind to (0.0.0.0 allows external connections in Docker)
+ENV PORT=8080
+ENV IP=0.0.0.0
 
 # Expose port 8080
 EXPOSE 8080

@@ -1,12 +1,17 @@
 use dioxus::{
-    logger::{self, tracing::{debug, error, field::debug, warn, Level}},
+    dioxus_core::LaunchConfig,
+    logger::{
+        self,
+        tracing::{debug, error, field::debug, warn, Level},
+    },
     prelude::*,
+    web::Config,
 };
 use web::{components::MaintenanceBanner, route::Route};
 
-// // Server-only imports for Axum integration
-// #[cfg(feature = "server")]
-// use dioxus::fullstack::prelude::ServeConfigBuilder;
+// Server-only imports for Axum integration
+#[cfg(feature = "server")]
+use dioxus::fullstack::prelude::ServeConfigBuilder;
 
 // We can import assets in dioxus with the `asset!` macro. This macro takes a path to an asset relative to the crate root.
 // The macro returns an `Asset` type that will display as the path to the asset in the browser or a local path in desktop bundles.
@@ -29,18 +34,48 @@ fn main() {
         }
     }
 
+    let addr = dioxus_cli_config::fullstack_address_or_localhost();
+    debug!("Starting Dioxus app at {addr}");
 
-    dioxus::launch( || {
-        if MAINTENANCE_MODE {
-            error!("Maintenance mode is enabled. The site will not be accessible.");
-            return rsx! { MaintenanceBanner {} };
-        }
+    // Configure the server to serve static assets
+    #[cfg(feature = "server")]
+    let config = ServeConfigBuilder::default().build().unwrap();
 
-        rsx! {
-            document::Link { rel: "icon", href: FAVICON }
-            document::Link { rel: "stylesheet", href: MAIN_CSS }
-            document::Link { rel: "stylesheet", href: TAILWIND_CSS }
+    #[cfg(feature = "server")]
+    dioxus::LaunchBuilder::new().with_cfg(config).launch(app);
+
+    #[cfg(not(feature = "server"))]
+    dioxus::LaunchBuilder::new().launch(app);
+
+    LaunchBuilder::new()
+        // Only set the server config if the server feature is enabled
+        .with_cfg(server_only! {
+            // ServeConfigBuilder::default().root_id("app")
+            ServeConfigBuilder::default().root_id("app")
+        })
+        // You also need to set the root id in your web config
+        .with_cfg(web! {
+            dioxus::web::Config::default().rootname("app")
+        })
+        // And desktop config
+        // .with_cfg(desktop! {
+        //     dioxus::desktop::Config::default().with_root_name("app")
+        // })
+        .launch(app);
+}
+
+fn app() -> Element {
+    if MAINTENANCE_MODE {
+        error!("Maintenance mode is enabled. The site will not be accessible.");
+        return rsx! { MaintenanceBanner {} };
+    }
+
+    rsx! {
+        div {
+            document::Link { rel: "icon", href: FAVICON },
+            document::Link { rel: "stylesheet", href: MAIN_CSS },
+            document::Link { rel: "stylesheet", href: TAILWIND_CSS },
             Router::<Route> {}
         }
-    })
+    }
 }
