@@ -1,5 +1,5 @@
 [package]
-name = "web"
+name = "PersonalSite"
 version = "0.1.0"
 authors = ["Nico Judge <nico.a.judge@gmail.com>"]
 edition = "2021"
@@ -8,13 +8,11 @@ edition = "2021"
 
 [dependencies]
 dioxus = { version = "0.6.0", features = ["router", "fullstack"] }
-# CLI configuration for getting the correct server address
-dioxus-cli-config = "0.6.0"
 reqwest = { version = "0.11", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+# Only include diesel for server-side builds (not web/wasm)
 diesel = { version = "2.2.11", features = ["sqlite"], optional = true }
-dioxus-fullstack = "0.6.3"
 
 [features]
 default = ["web"]
@@ -22,12 +20,10 @@ default = ["web"]
 web = ["dioxus/web"]
 # The feature that are only required for the desktop build target should be optional and only enabled in the desktop feature
 desktop = ["dioxus/desktop"]
-# The feature that are only required for the server build target should be optional and only enabled in the server feature
-server = ["dioxus/server", "diesel"]
-
-[build]
-jobs = 2
-incremental = true
+# The feature that are only required for the mobile build target should be optional and only enabled in the mobile feature
+mobile = ["dioxus/mobile"]
+# Server feature that includes diesel for database operations
+server = ["dep:diesel"]
 
 [profile]
 

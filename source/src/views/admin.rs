@@ -27,6 +27,13 @@ pub async fn validate_session() -> Result<bool, ServerFnError> {
 }
 
 #[component]
+pub fn NotWorkingNotice() -> Element {
+    rsx! {
+        p  { "This page does not yet have working logic and the button does nothing. More features will be implemented as time goes forth" }
+    }
+}
+
+#[component]
 pub fn Admin() -> Element {
     // let session_valid: Option<bool> = Some(true);
     let session_valid: Option<bool> = Some(false);
@@ -40,11 +47,17 @@ pub fn Admin() -> Element {
             // if session isn't valid, return to login page
             if !session_valid {
                 warn!("Admin session is not valid, redirecting to login page");
-                return rsx! { AdminLogin {} };
+                return rsx! {
+                    NotWorkingNotice {}
+                    AdminLogin {}
+                };
             }
 
             info!("Admin session is valid, rendering admin view");
-            return rsx! { AdminView {} };
+            return rsx! {
+                NotWorkingNotice {}
+                AdminView {}
+            };
         }
         None => {
             // If we haven't validated yet display "loading"

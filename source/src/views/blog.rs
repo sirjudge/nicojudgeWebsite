@@ -1,13 +1,31 @@
 use crate::{
     components::{ResourceNotFound, UnexpectedError},
-    models::BlogPost,
+    models::{get_post_by_id, BlogPostModel},
 };
+
 use dioxus::{
-    logger::tracing::{debug, error, warn},
+    logger::tracing::{debug, error, field::debug, warn},
     prelude::*,
 };
 
 // const BLOG_CSS: Asset = asset!("/assets/styling/blog.css");
+
+pub async fn get_blog_model(post_id: i32) -> Option<BlogPostModel> {
+    match get_post_by_id(post_id).await {
+        Ok(Some(post)) => {
+            debug!("Blog post with id {post_id} found: {post:?}");
+            Some(post.to_model())
+        }
+        Ok(None) => {
+            warn!("Blog post with id {post_id} not found");
+            None
+        }
+        Err(e) => {
+            error!("Error fetching blog post with id {post_id}: {e}");
+            None
+        }
+    }
+}
 
 /// The Blog page component that will be rendered when the current route is `[Route::Blog]`
 ///
@@ -16,11 +34,11 @@ use dioxus::{
 #[component]
 pub fn Blog(id: i32) -> Element {
     debug!("Rendering blog post with id: {id}");
-    match BlogPost::get_post_by_id(id) {
-        // If the post is found, we can render it as HTML
-        Ok(Some(post)) => {
-            debug!("Blog post with id {id} found: {post:?}");
-            return rsx! {
+    // Use use_resource to call the server function
+    let post_resource = use_resource(move || async move { get_blog_model(id).await });
+    let x = match &*post_resource.read() {
+        Some(Some(post)) => {
+            rsx! {
                 // div { id: "blog-post", dangerously_set_inner_html: post.to_html() }
                 div {
                     class: "blog-post",
@@ -33,27 +51,30 @@ pub fn Blog(id: i32) -> Element {
                     //TODO: this isn't rendering the HTML correctly. I think
                     //it's just dipslaying the HTML as raw text instead of rednering
                     //the actual html content
+                    //TODO: Maybe don't use danger_inner_html but eh what's the worst that could
+                    //happen
                     p {
                         class: "blog-post-content",
-                        "{post.content}"
+                        dangerous_inner_html:post.content.to_string()
                     }
                 }
-            };
+            }
         }
-        // If the post is not found, render a "not found" element
-        Ok(None) => {
+        Some(None) => {
             warn!("Blog post with id {id} not found");
-            return rsx! {
+            rsx! {
                 ResourceNotFound {}
-            };
+            }
         }
-        // If there was an error getting the post, we can log it and render a generic server error
-        // message
-        Err(e) => {
-            error!("Error getting blog post with id {id}: {e}");
-            return rsx! {
-                UnexpectedError {}
-            };
+        None => {
+            debug!("Loading blog post with id {id}");
+            rsx! {
+                div {
+                    class: "loading",
+                    p { "Loading blog post..." }
+                }
+            }
         }
-    }
+    };
+    x
 }

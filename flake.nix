@@ -1,5 +1,5 @@
 {
-  description = "Bevy Development environment";
+  description = "A nix flake for a rust development environment with dioxus WASM and sqlite support";
 
   inputs = {
     # Retrieve current Nixpkgs unstable channel
@@ -29,17 +29,18 @@
 
         # Define which tools in the rust tool chain to use
         rustToolchain = pkgs.rust-bin.stable.latest.default.override {
-          extensions = [ "rust-src" "rust-analyzer" "clippy" ];
+          extensions = [ "rust-src" "clippy" ];
           targets = [ "wasm32-unknown-unknown" ];
         };
       in {
-
         # Load packages used for build time
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [ pkg-config ];
           buildInputs = with pkgs; [
             # Build dependencies
+            rustup
             rustToolchain
+            rust-analyzer # Add this line
             clang
             llvmPackages_latest.bintools
             glibc.dev
@@ -70,6 +71,8 @@
 
             # Set up the build environment
             export BINDGEN_EXTRA_CLANG_ARGS="-I${pkgs.glibc.dev}/include -I${pkgs.llvmPackages_latest.libclang.lib}/lib/clang/${pkgs.llvmPackages_latest.libclang.version}/include -I${pkgs.glib.dev}/include/glib-2.0 -I${pkgs.glib.out}/lib/glib-2.0/include/";
+
+            rustup component add rust-analyzer
 
             # Start ZSH shell instead of bash shell
             zsh

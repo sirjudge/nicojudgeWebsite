@@ -1,0 +1,12 @@
+**/target
+**/dist
+LICENSES
+LICENSE
+temp
+README.md
+.idea
+.vscode
+.code
+*.old
+*.log
+

@@ -1,49 +1,17 @@
-use dioxus::logger;
-// The dioxus prelude contains a ton of common items used in dioxus apps. It's a good idea to import wherever you
-// need dioxus
-use dioxus::{logger::tracing::Level, prelude::*};
+use dioxus::{
+    dioxus_core::LaunchConfig,
+    logger::{
+        self,
+        tracing::{debug, error, field::debug, warn, Level},
+    },
+    prelude::*,
+    web::Config,
+};
+use web::{components::MaintenanceBanner, route::Route};
 
-use components::MaintenanceBanner;
-use views::{Admin, Blog, Home, Navbar, Projects};
-
-/// Define a components module that contains all shared components for our app.
-mod components;
-/// Define a views module that contains the UI for all Layouts and Routes for our app.
-mod views;
-
-/// The models module contains all the data structures and logic for our app.
-mod models;
-
-/// Schema module contains the database schema for our app used by diesel.
-mod schema;
-
-/// The Route enum is used to define the structure of internal routes in our app. All route enums need to derive
-/// the [`Routable`] trait, which provides the necessary methods for the router to work.
-///
-/// Each variant represents a different URL pattern that can be matched by the router. If that pattern is matched,
-/// the components for that route will be rendered.
-#[derive(Debug, Clone, Routable, PartialEq)]
-#[rustfmt::skip]
-enum Route {
-    // The layout attribute defines a wrapper for all routes under the layout. Layouts are great for wrapping
-    // many routes with a common UI like a navbar.
-    #[layout(Navbar)]
-        // The route attribute defines the URL pattern that a specific route matches. If that pattern matches the URL,
-        // the component for that route will be rendered. The component name that is rendered defaults to the variant name.
-        #[route("/")]
-        Home {},
-
-        // The route attribute can include dynamic parameters that implement [`std::str::FromStr`] and [`std::fmt::Display`] with the `:` syntax.
-        // In this case, id will match any integer like `/blog/123` or `/blog/-456`.
-        #[route("/blog/:id")]
-        Blog { id: i32 },
-
-        #[route("/projects")]
-        Projects {},
-
-        #[route("/admin")]
-        Admin {}
-}
+// Server-only imports for Axum integration
+#[cfg(feature = "server")]
+use dioxus::fullstack::prelude::ServeConfigBuilder;
 
 // We can import assets in dioxus with the `asset!` macro. This macro takes a path to an asset relative to the crate root.
 // The macro returns an `Asset` type that will display as the path to the asset in the browser or a local path in desktop bundles.
@@ -51,37 +19,62 @@ const FAVICON: Asset = asset!("/assets/favicon.ico");
 // The asset macro also minifies some assets like CSS and JS to make bundled smaller
 const MAIN_CSS: Asset = asset!("/assets/styling/main.css");
 const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
-
-fn main() {
-    logger::init(Level::DEBUG);
-    // The `launch` function is the main entry point for a dioxus app. It takes a component and renders it with the platform feature
-    // you have enabled
-    dioxus::launch(App);
-}
-
+// Do something better with this but for now fine with keeping it
+// as a constant
 const MAINTENANCE_MODE: bool = false;
 
-/// Main entry point for the application. Checks for if app is in maintenance mode and renders
-/// either the main app or a maintenance banner.
-#[component]
-fn App() -> Element {
-    // if we're in maintenance mode, render a maintenance message instead of the app
-    if MAINTENANCE_MODE {
-        return rsx! {
-           MaintenanceBanner {}
-        };
+fn main() {
+    match logger::init(Level::DEBUG) {
+        Ok(_) => {
+            // Logger initialized successfully
+            debug!("Logger initialized successfully");
+        }
+        Err(e) => {
+            eprintln!("Failed to initialize logger: {e}");
+        }
     }
 
-    // The `rsx!` macro lets us define HTML inside of rust. It expands to an Element with all of our HTML inside.
-    rsx! {
-        // In addition to element and text (which we will see later), rsx can contain other components. In this case,
-        // we are using the `document::Link` component to add a link to our favicon and main CSS file into the head of our app.
-        document::Link { rel: "icon", href: FAVICON }
-        document::Link { rel: "stylesheet", href: MAIN_CSS }
-        document::Link { rel: "stylesheet", href: TAILWIND_CSS }
+    // Configure the server to serve static assets
+    #[cfg(feature = "server")]
+    let config = ServeConfigBuilder::default().build().unwrap();
 
-        // The router component renders the route enum we defined above. It will handle synchronization of the URL and render
-        // the layouts and components for the active route.
-        Router::<Route> {}
+    #[cfg(feature = "server")]
+    dioxus::LaunchBuilder::new().with_cfg(config).launch(app);
+
+    #[cfg(not(feature = "server"))]
+    dioxus::LaunchBuilder::new().launch(app);
+
+    LaunchBuilder::new()
+        // Only set the server config if the server feature is enabled
+        .with_cfg(server_only! {
+            ServeConfigBuilder::default()
+                .root_id("app")
+        })
+        // You also need to set the root id in your web config
+        .with_cfg(web! {
+            dioxus::web::Config::default().rootname("app")
+        })
+        //NOTE: Don't need this as we aren't serving a desktop application at
+        //the moment, it just be fullstack/server + web
+        // And desktop config
+        // .with_cfg(desktop! {
+        //     dioxus::desktop::Config::default().with_root_name("app")
+        // })
+        .launch(app);
+}
+
+fn app() -> Element {
+    if MAINTENANCE_MODE {
+        error!("Maintenance mode is enabled. The site will not be accessible.");
+        return rsx! { MaintenanceBanner {} };
+    }
+
+    rsx! {
+        div {
+            document::Link { rel: "icon", href: FAVICON },
+            document::Link { rel: "stylesheet", href: MAIN_CSS },
+            document::Link { rel: "stylesheet", href: TAILWIND_CSS },
+            Router::<Route> {}
+        }
     }
 }

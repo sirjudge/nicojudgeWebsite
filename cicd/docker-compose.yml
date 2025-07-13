@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: cicd/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - RUST_LOG=info
+      - PORT=8080
+      - IP=0.0.0.0
+    volumes:
+      # Mount the database file for persistence
+      - ../source/main.db:/app/main.db
+    restart: unless-stopped
+
+  # Optional: Add a development service with hot reload
+  web-dev:
+    build:
+      context: ..
+      dockerfile: cicd/Dockerfile.dev
+    ports:
+      - "8081:8080"
+    volumes:
+      - ../source:/app
+      - /app/target
+    environment:
+      - RUST_LOG=debug
+      - PORT=8080
+      - IP=0.0.0.0
+    profiles:
+      - dev 

@@ -1,0 +1,115 @@
+# Dockerfile for Dioxus Fullstack Web Application
+# This Dockerfile builds a production-ready container for a Dioxus fullstack application
+# that includes both client-side WASM components and server-side functionality.
+# Build process:
+# 1. Builder stage: Compiles the Rust server binary and builds the web assets
+# 2. Runtime stage: Creates a minimal container with only the necessary runtime dependencies
+
+# PORT CONFIGURATION:
+# - Dioxus fullstack applications default to port 3000 when using dioxus_cli_config::fullstack_address_or_localhost()
+# - For Docker deployment, we override this with environment variables:
+#   * PORT=8080: Sets the port the server listens on
+#   * IP=0.0.0.0: Allows external connections (required for Docker containers)
+# - The Docker container exposes port 8080 and maps it to the host
+# - This ensures the application is accessible from outside the container
+
+# Use the official Rust image as the base
+FROM rust:1.81 AS builder
+
+# Install necessary tools for building
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    sqlite3 \
+    libssl3 \
+    libssl-dev \
+    libsqlite3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+
+# Install locked version of dioxus CLI so we don't accidentally break
+# it during an update
+RUN cargo install dioxus-cli --version 0.6.3 --locked
+
+# Add wasm32 target for web builds
+# Required for client-side WASM compilation
+RUN rustup target add wasm32-unknown-unknown
+
+# Set working directory
+WORKDIR /app
+
+# Copy dependency files first for better Docker layer caching
+# This allows Docker to cache the dependency compilation step
+COPY source/Cargo.toml source/Cargo.lock ./
+COPY source/Dioxus.toml ./
+COPY source/rust-toolchain.toml ./
+COPY source/diesel.toml ./
+
+# Copy source code and assets
+COPY source/src/ ./src/
+COPY source/assets/ ./assets/
+COPY source/migrations/ ./migrations/
+
+# Copy CSS and config files
+COPY source/tailwind.css ./
+COPY source/tailwind.config.js ./
+
+# TODO: This is not the best approach to handle this but
+# it works for now so I'll keep it and revist this problem later
+# Copy the database file
+COPY source/main.db ./
+
+# Build the fullstack application (this creates both WASM client and server binary)
+# For Dioxus 0.6.x with fullstack features:
+# 1. cargo build --release --features server: Builds the server binary with server functions and diesel
+# 2. dx bundle --platform web --features web --no-default-features: Builds the client-side WASM, static assets, and fullstack server binary
+#    - Creates server binary at: /app/target/dx/web/release/web/server
+#    - Creates static assets at: /app/target/dx/web/release/web/public/
+RUN cargo build --release --features server
+
+# Runtime stage - use the same rust image to have dx available
+FROM rust:1.81
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    sqlite3 \
+    libssl3 \
+    libsqlite3-0 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app user for security (don't run as root)
+RUN useradd -m -u 1001 app
+
+# Set working directory
+WORKDIR /app
+
+# Copy the entire source code and built artifacts from builder stage
+COPY --from=builder /app/ ./
+
+# Change ownership to app user
+RUN chown -R app:app /app
+
+# Fix cargo permissions - give app user access to cargo registry
+RUN chown -R app:app /usr/local/cargo
+
+# Switch to app user
+USER app
+
+# Install dioxus CLI as the app user to avoid permission issues
+RUN cargo install dioxus-cli --version 0.6.3 --locked
+
+# Add wasm32 target for web builds as the app user
+RUN rustup target add wasm32-unknown-unknown
+
+# Set environment variables for Dioxus server configuration
+# PORT: The port the server should listen on (matches Docker EXPOSE)
+# IP: The IP address to bind to (0.0.0.0 allows external connections in Docker)
+ENV PORT=8080
+ENV IP=0.0.0.0
+
+# Expose port 8080
+EXPOSE 8080
+
+# Use dx serve to run the application with proper static asset serving
+# The --port flag overrides the default port configuration
+CMD ["dx", "serve", "--port", "8080", "--platform", "web", "--features", "web", "--no-default-features"]
