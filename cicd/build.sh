@@ -39,8 +39,22 @@ check_directory() {
 # Function to build the production image
 build_production() {
     check_directory
+    #!/bin/bash
+
+    if [[ -z "$GITHUB_TOKEN" ]] || [[ -z "$DATABASE_URL" ]]; then
+        echo "Error: GITHUB_TOKEN and DATABASE_URL environment variables are not set." >&2
+        exit 1
+    fi
+
     print_step "Building production Docker image..."
-    if docker build -f cicd/Dockerfile.debian -t dioxus-web:latest --progress=plain .; then
+
+    if
+        docker build -f cicd/Dockerfile.debian \
+        -t dioxus-web:latest \
+        --secret type=env,id=GITHUB_TOKEN,env=GITHUB_TOKEN \
+        --secret type=env,id=DATABASE_URL,env=DATABASE_URL  \
+        --progress=plain .;
+    then
         print_step "Production image built successfully!"
     else
         print_error "Failed to build production image"
@@ -85,33 +99,33 @@ clean() {
 
 # Main script logic
 case "${1:-}" in
-    "build")
-        build_production
-        ;;
-    "run")
-        build_production
-        run_production
-        ;;
-    "stop")
-        stop_containers
-        ;;
-    "clean")
-        clean
-        ;;
-    "logs")
-        docker logs -f dioxus-web 2>/dev/null || (cd cicd && docker-compose logs -f web-dev)
-        ;;
-    *)
-        echo "Usage: $0 {build|run|dev|stop|clean|logs}"
-        echo ""
-        echo "Commands:"
-        echo "  build  - Build the production Docker image"
-        echo "  run    - Build and run the production container"
-        echo "  stop   - Stop all running containers"
-        echo "  clean  - Remove all containers and images"
-        echo "  logs   - Show container logs"
-        echo ""
-        echo "Note: Run this script from the project root directory"
-        exit 1
-        ;;
+"build")
+    build_production
+    ;;
+"run")
+    build_production
+    run_production
+    ;;
+"stop")
+    stop_containers
+    ;;
+"clean")
+    clean
+    ;;
+"logs")
+    docker logs -f dioxus-web 2>/dev/null || (cd cicd && docker-compose logs -f web-dev)
+    ;;
+*)
+    echo "Usage: $0 {build|run|dev|stop|clean|logs}"
+    echo ""
+    echo "Commands:"
+    echo "  build  - Build the production Docker image"
+    echo "  run    - Build and run the production container"
+    echo "  stop   - Stop all running containers"
+    echo "  clean  - Remove all containers and images"
+    echo "  logs   - Show container logs"
+    echo ""
+    echo "Note: Run this script from the project root directory"
+    exit 1
+    ;;
 esac

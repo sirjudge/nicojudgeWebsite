@@ -36,7 +36,6 @@ pub async fn get_blog_model(post_id: i32) -> Option<BlogPostModel> {
 #[component]
 pub fn Blog(id: i32) -> Element {
     debug!("Rendering blog post with id: {id}");
-
     // Use use_resource to call the server function
     let post_resource = use_resource(move || async move { get_blog_model(id).await });
     let x = match &*post_resource.read() {
