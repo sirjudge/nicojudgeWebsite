@@ -34,9 +34,6 @@ fn main() {
         }
     }
 
-    let addr = dioxus_cli_config::fullstack_address_or_localhost();
-    debug!("Starting Dioxus app at {addr}");
-
     // Configure the server to serve static assets
     #[cfg(feature = "server")]
     let config = ServeConfigBuilder::default().build().unwrap();

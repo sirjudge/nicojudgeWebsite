@@ -3,7 +3,6 @@ use dioxus::logger::tracing::{info, warn, debug, error};
 
 #[component]
 pub fn Bio() -> Element {
-    info!("Loading bio element");
     rsx! {
         div {
             class: "bio",
