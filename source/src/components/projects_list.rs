@@ -1,5 +1,5 @@
-use crate::{components::errors::UnexpectedError, models::Repository};
-use dioxus::{logger::tracing::error, prelude::{server_fn::response, *}};
+use crate::models::Repository;
+use dioxus::{logger::tracing::error, prelude::*};
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
 
 #[component]
@@ -57,38 +57,37 @@ pub fn ProjectsTableBody() -> Element {
 
 #[server]
 pub async fn fetch_github_repos() -> Result<Vec<Repository>, ServerFnError> {
-    //TODO: Should maybe think about declaring the client outside of this function and having it
-    //accessible instead of re-initializing it every time this function is called.
+    //TODO: Should really move this client to be initialized in the app or higher up but fine to
+    //keep for now
     let client = reqwest::Client::new();
+
+    // Create auth and user agent headers
     let mut headers = HeaderMap::new();
-    //NOTE: I need this user agent header to work to avoid 403 errors
-    //but also wondering if it has to be rust-app or if it can be whatever I want
-    // headers.insert(USER_AGENT, HeaderValue::from_static("rust-app"));
     headers.insert(USER_AGENT, HeaderValue::from_static("nicojudge.com"));
     headers.insert(
         AUTHORIZATION,
         HeaderValue::from_str(&format!("Bearer {}", std::env::var("GITHUB_TOKEN")?))?,
     );
 
+    // initialize git api endpoint
     let git_api_url = "https://api.github.com/user/repos?sort=pushed&direction=desc";
 
-    match client
-        .get(git_api_url)
-        .headers(headers)
-        .send()
-        .await {
-            Ok(response) => {
-                if response.status().is_success() {
-                    match response.json::<Vec<Repository>>().await {
-                        Ok(repos) => Ok(repos),
-                        Err(e) => Err(ServerFnError::new(e.to_string())),
-                    }
+    // return either the repo vector or a prorper error response string
+    match client.get(git_api_url).headers(headers).send().await {
+        Ok(response) => {
+            if response.status().is_success() {
+                match response.json::<Vec<Repository>>().await {
+                    Ok(repos) => Ok(repos),
+                    Err(e) => Err(ServerFnError::new(e.to_string())),
                 }
-                else {
-                    error!("Failed to fetch repositories: {}", response.status());
-                    Err(ServerFnError::new(format!("Failed to fetch repositories: {}",response.status())))
-                }
-            },
-            Err(e) => Err(ServerFnError::new(e.to_string())),
+            } else {
+                error!("Failed to fetch repositories: {}", response.status());
+                Err(ServerFnError::new(format!(
+                    "Failed to fetch repositories: {}",
+                    response.status()
+                )))
+            }
+        }
+        Err(e) => Err(ServerFnError::new(e.to_string())),
     }
 }

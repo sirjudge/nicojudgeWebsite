@@ -1,16 +1,15 @@
-use serde::{Serialize, Deserialize};
-use dioxus::{
-    // prelude::{server, ServerFnError},
-    prelude::*,
-    logger::tracing::{error, info}
-};
 #[cfg(feature = "server")]
 use crate::schema::blog_posts;
 #[cfg(feature = "server")]
 use crate::schema::blog_posts::dsl::*;
 #[cfg(feature = "server")]
-use diesel::{SqliteConnection,prelude::*};
-
+use diesel::{prelude::*, SqliteConnection};
+use dioxus::{
+    logger::tracing::{error, info},
+    // prelude::{server, ServerFnError},
+    prelude::*,
+};
+use serde::{Deserialize, Serialize};
 
 /// This is a separation of the model used for the database and the model used for the API.
 /// so we can eliminate the diesel dependency from the frontend layer
@@ -20,7 +19,7 @@ use diesel::{SqliteConnection,prelude::*};
 pub struct BlogPostModel {
     pub id: i32,
     pub title: String,
-    pub content: String
+    pub content: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -43,32 +42,34 @@ impl BlogPost {
     }
 }
 
-
 #[server]
 pub async fn get_post_by_id(post_id: i32) -> Result<Option<BlogPost>, ServerFnError> {
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
     match SqliteConnection::establish(&database_url)
-        .map_err(|_| ServerFnError::new("Failed to connect to the database")) {
+        .map_err(|_| ServerFnError::new("Failed to connect to the database"))
+    {
         Ok(mut connection) => {
             info!("Successfully connected to the database");
-        let posts = blog_posts
-            .filter(id.eq(post_id))
-            .limit(1)
-            .select(BlogPost::as_select())
-            .load(&mut connection)
-            .map_err(|e| ServerFnError::new(format!("Error loading blog post: {e}")))?;
+            let posts = blog_posts
+                .filter(id.eq(post_id))
+                .limit(1)
+                .select(BlogPost::as_select())
+                .load(&mut connection)
+                .map_err(|e| ServerFnError::new(format!("Error loading blog post: {e}")))?;
 
-        if posts.is_empty() {
-            info!("No post found with id: {post_id}");
-            return Ok(None);
-    }
+            if posts.is_empty() {
+                info!("No post found with id: {post_id}");
+                return Ok(None);
+            }
 
-    info!("Post found with id: {post_id}");
-    Ok(posts.into_iter().next())
-        },
+            info!("Post found with id: {post_id}");
+            Ok(posts.into_iter().next())
+        }
         Err(e) => {
-            return Err(ServerFnError::new(format!("Database connection error: {e}")));
+            return Err(ServerFnError::new(format!(
+                "Database connection error: {e}"
+            )));
         }
     }
 }

@@ -10,7 +10,6 @@ use dioxus::{
 
 // const BLOG_CSS: Asset = asset!("/assets/styling/blog.css");
 
-
 pub async fn get_blog_model(post_id: i32) -> Option<BlogPostModel> {
     match get_post_by_id(post_id).await {
         Ok(Some(post)) => {
@@ -27,7 +26,6 @@ pub async fn get_blog_model(post_id: i32) -> Option<BlogPostModel> {
         }
     }
 }
-
 
 /// The Blog page component that will be rendered when the current route is `[Route::Blog]`
 ///
@@ -53,9 +51,11 @@ pub fn Blog(id: i32) -> Element {
                     //TODO: this isn't rendering the HTML correctly. I think
                     //it's just dipslaying the HTML as raw text instead of rednering
                     //the actual html content
+                    //TODO: Maybe don't use danger_inner_html but eh what's the worst that could
+                    //happen
                     p {
                         class: "blog-post-content",
-                        "{post.content}"
+                        dangerous_inner_html:post.content.to_string()
                     }
                 }
             }
@@ -75,5 +75,6 @@ pub fn Blog(id: i32) -> Element {
                 }
             }
         }
-    }; x
+    };
+    x
 }
