@@ -65,12 +65,11 @@ COPY source/main.db ./
 #    - Creates server binary at: /app/target/dx/web/release/web/server
 #    - Creates static assets at: /app/target/dx/web/release/web/public/
 RUN cargo build --release --features server
-RUN dx bundle --platform web --features web --no-default-features
 
-# Runtime stage - minimal container for production
-FROM debian:bookworm-slim
+# Runtime stage - use the same rust image to have dx available
+FROM rust:1.81
 
-# Install runtime dependencies only (no development packages)
+# Install runtime dependencies
 RUN apt-get update && apt-get install -y \
     sqlite3 \
     libssl3 \
@@ -84,20 +83,23 @@ RUN useradd -m -u 1001 app
 # Set working directory
 WORKDIR /app
 
-# Copy the built application from builder stage
-# For fullstack builds, the dx bundle command creates a server binary and public assets
-COPY --from=builder /app/target/dx/web/release/web/server ./PersonalSite
-COPY --from=builder /app/target/dx/web/release/web/public/ ./dist/
-COPY --from=builder /app/main.db ./
-
-# Copy assets
-COPY --from=builder /app/assets/ ./assets/
+# Copy the entire source code and built artifacts from builder stage
+COPY --from=builder /app/ ./
 
 # Change ownership to app user
 RUN chown -R app:app /app
 
+# Fix cargo permissions - give app user access to cargo registry
+RUN chown -R app:app /usr/local/cargo
+
 # Switch to app user
 USER app
+
+# Install dioxus CLI as the app user to avoid permission issues
+RUN cargo install dioxus-cli --version 0.6.3 --locked
+
+# Add wasm32 target for web builds as the app user
+RUN rustup target add wasm32-unknown-unknown
 
 # Set environment variables for Dioxus server configuration
 # PORT: The port the server should listen on (matches Docker EXPOSE)
@@ -108,6 +110,6 @@ ENV IP=0.0.0.0
 # Expose port 8080
 EXPOSE 8080
 
-# Run the server binary (for fullstack builds)
-# The server binary serves both the API endpoints and static assets
-CMD ["./PersonalSite"]
+# Use dx serve to run the application with proper static asset serving
+# The --port flag overrides the default port configuration
+CMD ["dx", "serve", "--port", "8080", "--platform", "web", "--features", "web", "--no-default-features"]

@@ -10,4 +10,3 @@ serve-local:
 clean:
 	bash cicd/build.sh stop
 	docker system prune -a --volumes
-
