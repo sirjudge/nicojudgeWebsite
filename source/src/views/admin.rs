@@ -35,8 +35,8 @@ pub fn NotWorkingNotice() -> Element {
 
 #[component]
 pub fn Admin() -> Element {
-    // let session_valid: Option<bool> = Some(true);
-    let session_valid: Option<bool> = Some(false);
+    let session_valid: Option<bool> = Some(true);
+    // let session_valid: Option<bool> = Some(false);
     //BUG: This be not working, just set to true for now and figure this part out later
     // use_server_future(|| async {
     //     session_valid = Some(validate_session().await.unwrap());

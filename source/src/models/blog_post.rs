@@ -17,12 +17,12 @@ use serde::{Deserialize, Serialize};
 /// I'm just trying to compile it when I build for the web because
 /// there shouldn't be any diesel code on the front
 pub struct BlogPostModel {
-    pub id: i32,
+    pub id: Option<i32>,
     pub title: String,
     pub content: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 #[cfg_attr(feature = "server", derive(Queryable, Insertable, Selectable))]
 #[cfg_attr(feature = "server", diesel(table_name = blog_posts))]
 #[cfg_attr(feature = "server", diesel(check_for_backend(diesel::sqlite::Sqlite)))]
@@ -35,7 +35,7 @@ pub struct BlogPost {
 impl BlogPost {
     pub fn to_model(&self) -> BlogPostModel {
         BlogPostModel {
-            id: self.id.unwrap_or(0),
+            id: self.id,
             title: self.title.clone(),
             content: self.content.clone(),
         }
@@ -65,6 +65,28 @@ pub async fn get_post_by_id(post_id: i32) -> Result<Option<BlogPost>, ServerFnEr
 
             info!("Post found with id: {post_id}");
             Ok(posts.into_iter().next())
+        }
+        Err(e) => {
+            return Err(ServerFnError::new(format!(
+                "Database connection error: {e}"
+            )));
+        }
+    }
+}
+
+#[server]
+pub async fn save_post(blog_post_to_save: BlogPost) -> Result<Option<BlogPost>, ServerFnError> {
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    match SqliteConnection::establish(&database_url)
+        .map_err(|_| ServerFnError::new("Failed to connect to the database"))
+    {
+        Ok(mut connection) => {
+            let return_post = BlogPost {
+                id: Some(1234),
+                title: "Test insert title".to_string(),
+                content: "test insert content".to_string(),
+            };
+            Ok(Some(return_post))
         }
         Err(e) => {
             return Err(ServerFnError::new(format!(
