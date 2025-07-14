@@ -2,7 +2,6 @@ use crate::models::{BlogPost, BlogPostModel};
 use dioxus::{html::textarea, prelude::*};
 use std::default;
 
-
 #[derive(Debug)]
 struct BlogPostFormData {
     title: String,
@@ -17,7 +16,6 @@ impl BlogPostFormData {
         }
     }
 }
-
 
 #[server]
 pub async fn save_blog_post() -> Result<BlogPost, ServerFnError> {
@@ -34,33 +32,46 @@ pub async fn save_blog_post() -> Result<BlogPost, ServerFnError> {
 //https://github.com/DioxusLabs/dioxus/blob/main/examples/form.rs
 #[component]
 pub fn NewEditBlog() -> Element {
-    let mut form_data = use_signal(|| BlogPostFormData::new);
+    let mut post_title = use_signal(|| String::new);
+    let mut post_content = use_signal(|| String::new);
     let mut content_text_area = use_signal(|| String::new);
     rsx! {
         div {
             class: "new-edit-blog",
             h1 { "New/Edit Blog Post" }
             form {
+                id: "newEditBlogForm",
+                style: "display:flex; flex-direction:column;",
+                onsubmit:  move |input_event| {
+                    let title = post_title.read();
+                    let content = post_content.read();
+                    // println!("title: {:#?} content: {:#?}", title, content);
+                },
                 label {
                     "Post Title:"
-                }
+                },
                 input {
                     r#type: "text",
                     placeholder: "Title",
                     name: "title",
-                    required: true
-                }
-                br { }
+                    required: true,
+                    oninput: move |input_event| {
+                        println!("Input event: {:#?}", input_event);
+                        // post_title.set(input_event);
+                    }
+                },
                 label {
                     "Post Content:"
-                }
-                br { }
+                },
                 textarea {
                     placeholder: "Content",
                     name: "content",
                     required: true,
-                }
-                br { }
+                    oninput: move |input_event| {
+                        println!("Input event: {:#?}", input_event.value());
+                        // post_content.set(input_event.value());
+                    }
+                },
                 button {
                     r#type: "submit",
                     "Save"
