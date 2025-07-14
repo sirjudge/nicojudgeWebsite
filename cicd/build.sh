@@ -55,7 +55,7 @@ build_production() {
     docker build \
         --secret id=github_token,src=<(echo "$GITHUB_TOKEN") \
         --secret id=database_url,src=<(echo "$DATABASE_URL") \
-        -f cicd/Dockerfile.debian \
+        -f cicd/Dockerfile.debian.optimized \
         -t nicojudgedotcom:latest \
         .
 
