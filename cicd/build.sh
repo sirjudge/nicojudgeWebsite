@@ -1,9 +1,8 @@
 #!/bin/bash
-
 # Source .env file if it exists
 # this is a bit hacky but check for either cicd/.env or .env path since we may be in either location
 if [ -f cicd/.env ]; then
-    source .env
+    source cicd/.env
 fi
 
 if [ -f .env ]; then
@@ -32,7 +31,7 @@ print_error() {
 
 # Check if we're in the right directory
 check_directory() {
-    if [ ! -d "cicd" ] || [ ! -f "cicd/Dockerfile.debian" ]; then
+    if [ ! -d "cicd" ] || [ ! -f "cicd/Dockerfile.debian.optimized" ]; then
         print_error "This script must be run from the project root directory"
         print_error "Make sure you're in the directory containing the 'cicd' folder"
         exit 1
@@ -40,6 +39,8 @@ check_directory() {
 }
 
 # Function to build the production image
+# BUG: I don't think the github token and db url are being loaded into the
+# Container image
 build_production() {
     check_directory
     #!/bin/bash

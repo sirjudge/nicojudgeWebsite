@@ -8,5 +8,4 @@ serve-local:
 	dx serve
 
 clean:
-	bash cicd/build.sh stop
 	docker system prune -a --volumes
