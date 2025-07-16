@@ -1,3 +1,4 @@
+use crate::components::BlogPostFormData;
 #[cfg(feature = "server")]
 use crate::schema::blog_posts;
 #[cfg(feature = "server")]
@@ -6,7 +7,6 @@ use crate::schema::blog_posts::dsl::*;
 use diesel::{prelude::*, SqliteConnection};
 use dioxus::{
     logger::tracing::{error, info},
-    // prelude::{server, ServerFnError},
     prelude::*,
 };
 use serde::{Deserialize, Serialize};
@@ -38,6 +38,14 @@ impl BlogPost {
             id: self.id,
             title: self.title.clone(),
             content: self.content.clone(),
+        }
+    }
+
+    pub fn from_form_data(form_data:BlogPostFormData) -> BlogPost {
+        BlogPost {
+            id: None,
+            title: form_data.title,
+            content: form_data.content
         }
     }
 }

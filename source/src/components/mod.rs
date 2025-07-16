@@ -13,6 +13,7 @@ pub use errors::UnexpectedError;
 
 mod new_edit_blog;
 pub use new_edit_blog::NewEditBlog;
+pub use new_edit_blog::BlogPostFormData;
 
 mod maintenance;
 pub use maintenance::MaintenanceSettings;
