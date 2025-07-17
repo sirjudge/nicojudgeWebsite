@@ -54,21 +54,31 @@ pub fn MaintenanceSettings() -> Element {
     }
 }
 
+#[derive(Debug, Clone, Default)]
+#[cfg_attr(feature = "server", derive(FromRow))]
+pub struct WebFlags {
+    pub maintenance_mode: bool,
+    pub updated_date: chrono::DateTime<chrono::Utc>,
+}
+
 #[server]
 async fn get_mode() -> Result<bool, ServerFnError> {
     match create_connection().await {
         Ok(mut conn) => {
-            let result = sqlx::query!(
+            let result = sqlx::query_as::<_, WebFlags>(
                 "select maintenance_mode
                 from web_flags
                 order by updated_Date desc
-                limit 1"
+                limit 1",
             )
-            .fetch_all(&mut conn)
+            .fetch_optional(&mut conn)
             .await;
 
             match result {
-                Ok(query_result) => Ok(true),
+                Ok(query_result) => {
+                    info!("Extracted query_results:{:?}", query_result);
+                    Ok(true)
+                }
 
                 Err(e) => {
                     let error_message = format!("error selecting maintenance mode:{e}");
