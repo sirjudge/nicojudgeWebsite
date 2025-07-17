@@ -1,3 +1,4 @@
+use crate::components::maintenance;
 #[cfg(feature = "server")]
 use crate::database::create_connection;
 use dioxus::logger::tracing::{error, info};
@@ -10,7 +11,18 @@ use chrono::{DateTime, Utc};
 
 #[component]
 pub fn MaintenanceSettings() -> Element {
-    let mut maintenance_box = use_signal(|| get_mode().await);
+    let mut maintenance_box = use_signal(|| false);
+    // spawn(async {get_mode().await});
+    spawn(async move {
+        match get_mode().await {
+            Ok(enabled) => {
+                info!("Loaded enabled bit from db");
+            }
+            Err(err) => {
+                error!("Error occurred when extracting bit form db:{err}");
+            }
+        }
+    });
     rsx! {
         div {
             class: "maintenance-mode",

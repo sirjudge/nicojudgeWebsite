@@ -3,17 +3,16 @@
 /// This module defines the BlogPost struct and provides server functions
 /// for database operations. It uses SQLx for async database access with
 /// SQLite backend, replacing the previous Diesel-based implementation.
-
 use crate::components::BlogPostFormData;
 #[cfg(feature = "server")]
 use crate::database::create_connection;
-#[cfg(feature = "server")]
-use sqlx::{FromRow, Row};
 use dioxus::{
     logger::tracing::{error, info},
     prelude::*,
 };
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "server")]
+use sqlx::{FromRow, Row};
 
 /// Blog post model for frontend/API layer
 ///
@@ -100,7 +99,7 @@ pub async fn get_post_by_id(post_id: i32) -> Result<Option<BlogPost>, ServerFnEr
             info!("Successfully connected to the database");
 
             let result = sqlx::query_as::<_, BlogPost>(
-                "SELECT id, title, content FROM blog_posts WHERE id = ?1"
+                "SELECT id, title, content FROM blog_posts WHERE id = ?1",
             )
             .bind(post_id)
             .fetch_optional(&mut conn)
@@ -123,7 +122,9 @@ pub async fn get_post_by_id(post_id: i32) -> Result<Option<BlogPost>, ServerFnEr
         }
         Err(e) => {
             error!("Database connection error: {e}");
-            Err(ServerFnError::new(format!("Database connection error: {e}")))
+            Err(ServerFnError::new(format!(
+                "Database connection error: {e}"
+            )))
         }
     }
 }
@@ -177,13 +178,17 @@ pub async fn save_post(blog_post_to_save: BlogPost) -> Result<Option<BlogPost>, 
                 }
                 Err(e) => {
                     error!("Error occurred during blog insert: {e}");
-                    Err(ServerFnError::new(format!("Error occurred during blog insert: {e}")))
+                    Err(ServerFnError::new(format!(
+                        "Error occurred during blog insert: {e}"
+                    )))
                 }
             }
         }
         Err(e) => {
             error!("Database connection error: {e}");
-            Err(ServerFnError::new(format!("Database connection error: {e}")))
+            Err(ServerFnError::new(format!(
+                "Database connection error: {e}"
+            )))
         }
     }
 }
