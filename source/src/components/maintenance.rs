@@ -77,7 +77,7 @@ async fn get_mode() -> Result<bool, ServerFnError> {
             match result {
                 Ok(query_result) => {
                     info!("Extracted query_results:{:?}", query_result);
-                    Ok(true)
+                    Ok(query_result.unwrap().maintenance_mode)
                 }
 
                 Err(e) => {
