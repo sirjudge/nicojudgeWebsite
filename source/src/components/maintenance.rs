@@ -10,7 +10,7 @@ use chrono::{DateTime, Utc};
 
 #[component]
 pub fn MaintenanceSettings() -> Element {
-    let mut maintenance_box = use_signal(|| false);
+    let mut maintenance_box = use_signal(|| get_mode().await);
     rsx! {
         div {
             class: "maintenance-mode",
