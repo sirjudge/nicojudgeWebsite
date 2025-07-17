@@ -1,6 +1,6 @@
 // The dioxus prelude contains a ton of common items used in dioxus apps. It's a good idea to import wherever you
 // need dioxus
-use dioxus::{logger::tracing::Level, prelude::*};
+use dioxus::{prelude::*};
 use crate::views::{Admin, Blog, Home, Navbar, Projects};
 
 /// The Route enum is used to define the structure of internal routes in our app. All route enums need to derive

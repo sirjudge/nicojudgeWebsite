@@ -1,6 +1,6 @@
 use crate::components::{AdminLogin, AdminView};
 use dioxus::{
-    logger::tracing::{error, info, warn},
+    logger::tracing::{info, warn},
     prelude::*,
 };
 
