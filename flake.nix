@@ -38,6 +38,7 @@
           nativeBuildInputs = with pkgs; [ pkg-config ];
           buildInputs = with pkgs; [
             # Build dependencies
+            sqlx-cli
             rustup
             rustToolchain
             rust-analyzer # Add this line

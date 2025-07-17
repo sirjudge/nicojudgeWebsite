@@ -1,7 +1,9 @@
-use dioxus::prelude::*;
+use dioxus::logger::tracing::info;
+use dioxus::{html::input, prelude::*};
 
 #[component]
 pub fn MaintenanceSettings() -> Element {
+    let mut maintenance_box = use_signal(|| false);
     rsx! {
         div {
             class: "maintenance-mode",
@@ -9,21 +11,32 @@ pub fn MaintenanceSettings() -> Element {
             p { "The site is currently undergoing maintenance. Please check back later." }
             // You can add more details or a contact link here
             form {
+                onsubmit:  move |_| {
+                    if *maintenance_box.read() {
+                        info!("enbabling maintenance_mode");
+                    }
+                    else {
+                        info!("Disabling maintenance_mode");
+                    }
+                },
                 // Check box to turn site on and off of maintenance mode
                 input {
                     r#type: "checkbox",
                     name: "maintenance_mode",
                     id: "maintenance_mode",
-                    // This would typically be bound to a state or context in a real app
+                    oninput: move |input_event| {
+                        info!("maintenance_mode checkbox:{}",input_event.value());
+                        maintenance_box.set(input_event.value() == "true");
+                    }
                 }
-                // //TODO: Fix this later, just keeping it as a placeholder
-                // action: "admin/toggleMaintenance",
-                // method: "get",
                 button {
                     r#type: "submit",
-                    "Return to Home"
+                    "update maintenance_mode"
                 }
             }
         }
     }
 }
+
+// #[server]
+// async fn save_mode(enabled: bool) -> Result<(), ServerFnError> {}

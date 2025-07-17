@@ -1,9 +1,8 @@
 use crate::models::{save_post, BlogPost};
 
 use dioxus::{
-    html::textarea,
     logger::tracing::{debug, error, info, warn},
-    prelude::{server_fn::{error::Result}, *}
+    prelude::*,
 };
 use serde::{Deserialize, Serialize};
 
@@ -11,13 +10,6 @@ use serde::{Deserialize, Serialize};
 pub struct BlogPostFormData {
     pub title: String,
     pub content: String,
-}
-
-#[server]
-pub async fn save_new_post(blog_form_data: BlogPostFormData) -> Result<Option<BlogPost>, ServerFnError> {
-    let blog_post = BlogPost::from_form_data(blog_form_data);
-    info!("Attempting to save blog post:{}", blog_post.title);
-    save_post(blog_post).await
 }
 
 //TODO: Can find an example of form validation in dioxus here:
@@ -34,19 +26,25 @@ pub fn NewEditBlog() -> Element {
             form {
                 id: "newEditBlogForm",
                 style: "display:flex; flex-direction:column;",
-                onsubmit:  move |input_event| {
-                    let form_data = BlogPostFormData {
-                        title: post_title.read().to_string(),
-                        content: post_content.read().to_string()
-                    };
-
+                onsubmit:  move |_| {
+                    //TODO: Figure out how to make the onsubmit an async method but for now just
+                    //use spawn
                     spawn(async move {
-                        match save_new_post(form_data).await {
+                        let form_data = BlogPostFormData {
+                            title: post_title.read().to_string(),
+                            content: post_content.read().to_string()
+                        };
+
+                        let blog_post = BlogPost::from_form_data(form_data);
+                        match save_post(blog_post).await {
                             Ok(saved_post) => {
                                 info!("saved new post: {:?}", saved_post);
+                                //TODO: Should redirect to the view blog post page on save or have
+                                //a pop up that will take the user there if clicked
                             }
                             Err(e) => {
                                 error!("Failed to save post: {}", e);
+                                //TODO: Should display an error message/prompt here
                             }
                         }
                     });
@@ -62,7 +60,6 @@ pub fn NewEditBlog() -> Element {
                     oninput: move |input_event| {
                         post_title.set(input_event.value().clone());
                     }
-
                 },
                 label {
                     "Post Content:"
