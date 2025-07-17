@@ -7,6 +7,6 @@ CREATE TABLE IF NOT EXISTS blog_posts (
 );
 
 CREATE TABLE IF NOT EXISTS web_flags(
-    maintenance BIT NOT NULL
-    date_last_edited DATETIME NOT NULL
+    maintenance_mode BIT NOT NULL,
+    updated_Date DATETIME NOT NULL
 )

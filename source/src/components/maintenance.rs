@@ -1,5 +1,12 @@
-use dioxus::logger::tracing::info;
+#[cfg(feature = "server")]
+use crate::database::create_connection;
+use dioxus::logger::tracing::{error, info};
 use dioxus::{html::input, prelude::*};
+#[cfg(feature = "server")]
+use sqlx::{FromRow, Row};
+
+#[cfg(feature = "server")]
+use chrono::{DateTime, Utc};
 
 #[component]
 pub fn MaintenanceSettings() -> Element {
@@ -12,12 +19,21 @@ pub fn MaintenanceSettings() -> Element {
             // You can add more details or a contact link here
             form {
                 onsubmit:  move |_| {
-                    if *maintenance_box.read() {
-                        info!("enbabling maintenance_mode");
-                    }
-                    else {
-                        info!("Disabling maintenance_mode");
-                    }
+                    spawn(async move {
+                        if *maintenance_box.read() {
+                            info!("enbabling maintenance_mode");
+                            match save_mode(true).await {
+                                Ok(_) => { info!("Enabled maintenance_mode");},
+                                Err(e) => { error!("error ocured during enabling maintenance_mode:{}", e);}
+                            };
+                        }
+                        else {
+                            match save_mode(false).await {
+                                Ok(_) => { info!("disabled maintenance_mode");},
+                                Err(e) => { error!("error ocured during disabling maintenance_mode:{}", e);}
+                            };
+                        }
+                    });
                 },
                 // Check box to turn site on and off of maintenance mode
                 input {
@@ -38,5 +54,68 @@ pub fn MaintenanceSettings() -> Element {
     }
 }
 
-// #[server]
-// async fn save_mode(enabled: bool) -> Result<(), ServerFnError> {}
+#[server]
+async fn get_mode() -> Result<bool, ServerFnError> {
+    match create_connection().await {
+        Ok(mut conn) => {
+            let result = sqlx::query!(
+                "select maintenance_mode
+                from web_flags
+                order by updated_Date desc
+                limit 1"
+            )
+            .fetch_all(&mut conn)
+            .await;
+
+            match result {
+                Ok(query_result) => Ok(true),
+
+                Err(e) => {
+                    let error_message = format!("error selecting maintenance mode:{e}");
+                    return Err(ServerFnError::new(error_message));
+                }
+            }
+        }
+        Err(e) => {
+            return Err(ServerFnError::new(format!(
+                "database connection error: {e}"
+            )));
+        }
+    }
+}
+
+#[server]
+async fn save_mode(enabled: bool) -> Result<(), ServerFnError> {
+    match create_connection().await {
+        Ok(mut conn) => {
+            info!("inserting new value for maintenance_mode:{}", enabled);
+            let updated_date = Utc::now();
+            let result = sqlx::query!(
+                "INSERT INTO web_flags (maintenance_mode,updated_date) VALUES (?1,?2)",
+                enabled,
+                updated_date
+            )
+            .execute(&mut conn)
+            .await;
+
+            match result {
+                Ok(query_result) => {
+                    let inserted_id = query_result.last_insert_rowid() as i32;
+                    return Ok(());
+                }
+                Err(e) => {
+                    return Err(ServerFnError::new(format!(
+                        "Error occurred during blog insert: {e}"
+                    )));
+                }
+            }
+        }
+        Err(e) => {
+            return Err(ServerFnError::new(format!(
+                "database connection error: {e}"
+            )));
+        }
+    }
+
+    Ok(())
+}
