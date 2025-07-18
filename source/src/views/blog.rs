@@ -1,6 +1,8 @@
+use std::vec;
+
 use crate::{
     components::{ResourceNotFound, UnexpectedError},
-    models::{get_post_by_id, BlogPostModel},
+    models::{get_post_by_id, BlogPost, BlogPostModel},
 };
 
 use dioxus::{
@@ -24,6 +26,66 @@ pub async fn get_blog_model(post_id: i32) -> Option<BlogPostModel> {
             error!("Error fetching blog post with id {post_id}: {e}");
             None
         }
+    }
+}
+#[server]
+pub async fn get_blog_posts() -> Result<Vec<BlogPost>, ServerFnError> {
+
+}
+
+#[component]
+pub fn blog_table_rows(blog_list: Vec<BlogPost>) -> Element {
+    if blog_list.is_empty() {
+        return rsx! {
+            p { "No posts available" }
+        }
+    }
+
+    return rsx! {
+        for post in blog_list.iter() {
+            tr {
+                class: "blog_row",
+                td { "{post.title}" }
+                td { "{post.id}" }
+            }
+        }
+    };
+}
+
+
+#[component]
+pub fn BlogTableOfContents() -> Element {
+    debug!("Extracting blog table data now");
+    let blog_post_list = use_resource(move || async move { get_blog_posts().await });
+
+    match &*blog_post_list.read() {
+        Ok(Ok(list) => {
+           rsx! {
+                table {
+                    thead {
+                        tr{
+                            th { "title" }
+                            th { "name" }
+                        }
+                    }
+                    tbody {
+                        for blog in list {
+                            tr {
+                                class: "post-row",
+                                td { "{blog.title}" }
+                                td { "{blog.id}" }
+                            }
+                        }
+                    }
+                }
+           }
+        }
+        Err(e) => {
+            rsx! {
+               p { "error ocurred during blog list extraction" }
+            }
+        }
+
     }
 }
 

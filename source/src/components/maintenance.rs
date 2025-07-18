@@ -89,7 +89,16 @@ async fn get_mode() -> Result<bool, ServerFnError> {
             match result {
                 Ok(query_result) => {
                     info!("Extracted query_results:{:?}", query_result);
-                    Ok(query_result.unwrap().maintenance_mode)
+                   match query_result {
+                       Some(result) =>{
+                           Ok(result.maintenance_mode)
+                       }
+                       None =>{
+                            info!("No mode could be found, defaulting to false");
+                            Ok(false)
+                       }
+
+                   }
                 }
 
                 Err(e) => {
