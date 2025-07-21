@@ -27,17 +27,15 @@ pub fn blog_table_rows(blog_list: Vec<BlogPost>) -> Element {
     }
 
     rsx! {
-        // for post in blog_list.iter() {
-        //     tr {
-        //         class: "blog_row",
-        //         td { "{post.title}" }
-        //         //BUG: need to handle if Id is none but rust analyzer gets confused here
-        //         // td { "{post.id.}" }
-        //         td { "id: totally 1" }
-        //     }
-        // }
-        tr { td {"row 1 col 1"} td { "row 1 col 2" } }
-        tr { td {"row 2 col 1"} td { "row 2 col 2" } }
+        for post in blog_list.iter() {
+            tr {
+                class: "blog_row",
+                td { "{post.title}" }
+                //BUG: need to handle if Id is none but rust analyzer gets confused here
+                // td { "{post.id.}" }
+                td { "id: totally 1" }
+            }
+        }
     }
 }
 
@@ -46,34 +44,28 @@ pub fn blog_table_rows(blog_list: Vec<BlogPost>) -> Element {
 pub fn BlogTableOfContents() -> Element {
     debug!("Extracting blog table data now");
     let blog_post_list = use_resource(move || async move { get_blog_posts().await });
-    let blog_post_list= blog_post_list.read();
-    // this is of type
-    // GenerationalRef<Ref<'_, Option<Result<Vec<BlogPost>, ServerFnError>>>>
-    // but I want it to just be type Result<Vec<BlogPost>, ServerFnError>>
-    // or maybe just Vec<BlogPost>
-    if blog_post_list.is_some() {
-        return rsx! {
-            table {
-                thead {
-                    tr{
-                        th { "title" },
-                        th { "name" }
+
+    // this is an unholy abomination
+    // this is done to get this thing to compile first
+    // but I need to come back and fix this
+    match &*blog_post_list.clone().read() {
+        Some(post_list) => {
+            match post_list {
+                Ok(post_list) => {
+                    return rsx! {
+                        blog_table_rows { blog_list: post_list.clone() }
                     }
                 }
-                tbody {
-                    tr {
-                        class: "post-row",
-                        td { "supposed title" },
-                        td { "supposed content" }
-                    }
-                    // blog_table_rows()
+                Err(error) => {
+                    error!("Error ocurred extracting blog list: {:?}", error);
+                    return rsx! { p { "ah sheesh error on the backend sorry!" } };
                 }
             }
-        };
-    }
-    else {
-        rsx! {
-            p { "no blog posts currently available" }
+        }
+        None => {
+            return rsx! {
+                p { " no blog posts found" }
+            };
         }
     }
 }

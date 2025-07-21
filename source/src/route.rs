@@ -1,7 +1,7 @@
 // The dioxus prelude contains a ton of common items used in dioxus apps. It's a good idea to import wherever you
 // need dioxus
 use dioxus::{prelude::*};
-use crate::views::{Admin, Blog, Home, Navbar, Projects};
+use crate::views::{Admin, Blog,BlogTableOfContents ,Home, Navbar, Projects};
 
 /// The Route enum is used to define the structure of internal routes in our app. All route enums need to derive
 /// the [`Routable`] trait, which provides the necessary methods for the router to work.
@@ -19,6 +19,9 @@ pub enum Route {
     // the component for that route will be rendered. The component name that is rendered defaults to the variant name.
     #[route("/")]
     Home {},
+
+    #[route("/blogContents")]
+    BlogTableOfContents {},
 
     // The route attribute can include dynamic parameters that implement [`std::str::FromStr`] and [`std::fmt::Display`] with the `:` syntax.
     // In this case, id will match any integer like `/blog/123` or `/blog/-456`.
