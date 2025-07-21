@@ -1,9 +1,5 @@
-/// Blog post model and database operations using SQLx
-///
-/// This module defines the BlogPost struct and provides server functions
-/// for database operations. It uses SQLx for async database access with
-/// SQLite backend, replacing the previous Diesel-based implementation.
 use crate::components::BlogPostFormData;
+
 #[cfg(feature = "server")]
 use crate::database::create_connection;
 use dioxus::{
@@ -14,8 +10,6 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "server")]
 use sqlx::{FromRow, Row};
 
-/// Blog post model for frontend/API layer
-///
 /// This is a separation of the model used for the database and the model used for the API.
 /// This allows us to eliminate the SQLx dependency from the frontend layer and ensures
 /// that database-specific code only exists in server builds.
@@ -25,17 +19,7 @@ pub struct BlogPostModel {
     pub content: String,
 }
 
-/// Blog post entity for database operations
-///
-/// This struct represents a blog post as stored in the database.
-/// It includes SQLx derives for server builds and serde derives for serialization.
-///
-/// # Fields
-///
-/// * `id` - Optional primary key (auto-generated)
-/// * `title` - The blog post title
-/// * `content` - The blog post content (HTML)
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
 #[cfg_attr(feature = "server", derive(FromRow))]
 pub struct BlogPost {
     pub id: Option<i32>,
@@ -73,22 +57,17 @@ impl BlogPost {
     }
 }
 
-/// Retrieves a blog post by ID
-///
-/// This server function fetches a blog post from the database using its ID.
+/// Retrieves a blog post by ID by fetching a blog post from the database using its ID.
 /// It uses SQLx for async database operations and provides proper error handling.
 ///
 /// # Arguments
-///
 /// * `post_id` - The ID of the blog post to retrieve
 ///
 /// # Returns
-///
 /// A `Result` containing either `Some(BlogPost)` if found, `None` if not found,
 /// or a `ServerFnError` if an error occurs.
 ///
 /// # Examples
-///
 /// ```rust
 /// let post = get_post_by_id(1).await?;
 /// ```
@@ -129,17 +108,13 @@ pub async fn get_post_by_id(post_id: i32) -> Result<Option<BlogPost>, ServerFnEr
     }
 }
 
-/// Saves a new blog post to the database
-///
-/// This server function inserts a new blog post into the database and returns
-/// the created post with its assigned ID.
+/// Saves a new blog post to the database by inserting a new blog post into
+/// the database and returns the created post with its assigned ID.
 ///
 /// # Arguments
-///
 /// * `blog_post_to_save` - The blog post data to save
 ///
 /// # Returns
-///
 /// A `Result` containing either `Some(BlogPost)` with the saved post data,
 /// or a `ServerFnError` if an error occurs.
 ///
