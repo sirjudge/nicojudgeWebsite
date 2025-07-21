@@ -7,9 +7,9 @@ pub mod views;
 /// The models module contains all the data structures and logic for our app.
 pub mod models;
 
-/// Schema module contains the database schema for our app used by diesel.
+/// Database connection and migration management using SQLx.
 /// Only included for server builds.
 #[cfg(feature = "server")]
-pub mod schema;
+pub mod database;
 
 pub mod route;

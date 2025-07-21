@@ -1,6 +1,8 @@
+use std::vec;
+
 use crate::{
     components::{ResourceNotFound, UnexpectedError},
-    models::{get_post_by_id, BlogPostModel},
+    models::{get_post_by_id, BlogPost, BlogPostModel},
 };
 
 use dioxus::{

@@ -20,6 +20,9 @@ RUN apt-get update && apt-get install -y \
 # Install dioxus CLI
 RUN cargo install dioxus-cli --version 0.6.3 --locked
 
+# Install SQLx CLI for database migrations
+RUN cargo install sqlx-cli --no-default-features --features sqlite --locked
+
 # Add wasm32 target for client-side builds
 RUN rustup target add wasm32-unknown-unknown
 
@@ -30,7 +33,6 @@ WORKDIR /app
 COPY source/Cargo.toml source/Cargo.lock ./
 COPY source/Dioxus.toml ./
 COPY source/rust-toolchain.toml ./
-COPY source/diesel.toml ./
 
 # Build dependencies first (this layer will be cached)
 RUN mkdir src && echo "fn main() {}" > src/main.rs
