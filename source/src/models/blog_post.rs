@@ -40,19 +40,41 @@ impl BlogPost {
         }
     }
 
-    /// Creates a BlogPost from form data
-    ///
-    /// This method converts form input data into a BlogPost struct
-    /// ready for database insertion.
+    /// Creates a BlogPost from form data by converting form
+    /// input data into a BlogPost struct ready for database insertion.
     ///
     /// # Arguments
-    ///
     /// * `form_data` - The form data from the frontend
     pub fn from_form_data(form_data: BlogPostFormData) -> BlogPost {
         BlogPost {
             id: None,
             title: form_data.title,
             content: form_data.content,
+        }
+    }
+}
+
+#[server]
+pub async fn get_post_list() -> Result<Vec<BlogPost>, ServerFnError> {
+    let mut return_list: Vec<BlogPost> = Vec::new();
+    match create_connection().await {
+        Ok(mut conn) => {
+            let mut stream =
+                sqlx::query_as::<_, BlogPost>("SELECT id, title, content FROM blog_posts")
+                    .fetch_all(&mut conn)
+                    .await;
+
+            stream.into_iter().for_each(|post| {
+                info!("Found post:{:?}", post);
+                return_list.append(&mut post.clone())
+            });
+
+            Ok(return_list)
+        }
+        Err(error) => {
+            let error_message = format!("uh oh error occurred extrating list of posts:{:?}", error);
+            error!(error_message);
+            Err(ServerFnError::new(error_message))
         }
     }
 }

@@ -29,7 +29,6 @@ pub async fn get_blog_model(post_id: i32) -> Option<BlogPostModel> {
     }
 }
 
-
 /// The Blog page component that will be rendered when the current route is `[Route::Blog]`
 ///
 /// The component takes a `id` prop of type `i32` from the route enum. Whenever the id changes, the component function will be
