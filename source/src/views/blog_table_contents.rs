@@ -1,9 +1,13 @@
-use crate::models::{get_post_list, BlogPost};
-
 #[cfg(feature = "server")]
 use crate::database::create_connection;
-use dioxus::logger::tracing::{debug, error, info, warn};
-use dioxus::prelude::*;
+use crate::{
+    models::{get_post_list, BlogPost},
+    route::Route,
+};
+use dioxus::{
+    logger::tracing::{debug, error, info, warn},
+    prelude::*,
+};
 #[cfg(feature = "server")]
 use sqlx::{FromRow, Row};
 
@@ -35,8 +39,13 @@ pub fn blog_table_rows(blog_list: Vec<BlogPost>) -> Element {
         for post in blog_list.iter() {
             tr {
                 class: "blog_row",
-                td { "{post.title}" }
-                td { "{post.id:?}" }
+                td { "{post.id.unwrap_or(-1)}" }
+                td {
+                    Link {
+                        to: Route::Blog { id:post.id.unwrap_or(-1) },
+                        "{post.title}"
+                    }
+                }
             }
         }
     }
@@ -54,7 +63,13 @@ pub fn BlogTableOfContents() -> Element {
         Some(post_list) => match post_list {
             Ok(post_list) => {
                 return rsx! {
-                    blog_table_rows { blog_list: post_list.clone() }
+                    table {
+                        tr {
+                            th { "id" }
+                            th { "title" }
+                        }
+                        blog_table_rows { blog_list: post_list.clone() }
+                    }
                 }
             }
             Err(error) => {
