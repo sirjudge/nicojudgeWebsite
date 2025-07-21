@@ -66,6 +66,7 @@ COPY source/main.db ./
 # 2. dx bundle --platform web --features web --no-default-features: Builds the client-side WASM, static assets, and fullstack server binary
 #    - Creates server binary at: /app/target/dx/web/release/web/server
 #    - Creates static assets at: /app/target/dx/web/release/web/public/
+RUN cargo sqlx prepare
 RUN cargo build --release --features server
 
 # Runtime stage - use the same rust image to have dx available
