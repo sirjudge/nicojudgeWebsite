@@ -1,14 +1,14 @@
-# Optimized Dockerfile for Dioxus Fullstack Web Application
-# This Dockerfile creates a much smaller production image by:
-# 1. Using multi-stage builds properly
-# 2. Only copying necessary runtime files to the final stage
-# 3. Using a minimal base image for the runtime
-# 4. Removing build tools and intermediate files
-
 # ============================================================================
 # BUILDER STAGE - Full Rust environment for building
 # ============================================================================
 FROM rust:1.81 AS builder
+
+
+# Initialize and set the github and database environment variables
+ARG GITHUB_TOKEN
+ARG DATABASE_URL
+ENV GITHUB_TOKEN=${GITHUB_TOKEN}
+ENV DATABASE_URL=${DATABASE_URL}
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
@@ -34,10 +34,12 @@ COPY source/Cargo.toml source/Cargo.lock ./
 COPY source/Dioxus.toml ./
 COPY source/rust-toolchain.toml ./
 
+# note: this is an artifact from a previous iteration of the Dockerfile, just noticed we're doing this multiple times
+# It's causing too much slowdown
 # Build dependencies first (this layer will be cached)
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release --features server
-RUN rm -rf src
+# RUN mkdir src && echo "fn main() {}" > src/main.rs
+# RUN cargo build --release --features server
+# RUN rm -rf src
 
 # Copy source code and assets
 COPY source/src/ ./src/
@@ -47,14 +49,18 @@ COPY source/tailwind.css ./
 COPY source/tailwind.config.js ./
 COPY source/main.db ./
 
-# Mount secrets for build
-RUN --mount=type=secret,id=github_token \
-    --mount=type=secret,id=database_url \
-    export GITHUB_TOKEN=$(cat /run/secrets/github_token) && \
-    export DATABASE_URL=$(cat /run/secrets/database_url) && \
-    cargo build --release --features server
+# Build the fullstack application with proper environment variables
+RUN cargo build --release --features server
 
-# Build the fullstack application with dioxus
+# Note: I don't think we need this anymore now that I fixed the importing of
+# Environment variables
+# Prepare SQLx queries with DATABASE_URL available
+# RUN cargo sqlx prepare
+
+# Build the frontend with dioxus
+# Note: the `DATABASE_URL` environment variable is used in this stage
+# when validating the sqlx dependencies as it checks and verifies the sqlite
+# file has the correct tables and such
 RUN dx build --release --platform web --features web --no-default-features
 
 # ============================================================================
@@ -92,12 +98,15 @@ RUN chown -R app:app /app
 USER app
 
 # Set environment variables
+# Dioxus variables
 ENV PORT=8080
 ENV IP=0.0.0.0
+
+# Rust/app runtime variables
 ENV RUST_LOG=info
 
 # Expose port
 EXPOSE 8080
 
-# Run the server binary directly
-CMD ["./server"] 
+# Run the server binary directly instead of `dx serve`
+CMD ["./server"]
