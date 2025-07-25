@@ -38,32 +38,67 @@ check_directory() {
     fi
 }
 
-# Function to build the production image
-# BUG: I don't think the github token and db url are being loaded into the
-# Container image
-build_production() {
-    check_directory
-    #!/bin/bash
-
-    if [[ -z "$GITHUB_TOKEN" ]] || [[ -z "$DATABASE_URL" ]]; then
-        echo "Error: GITHUB_TOKEN and DATABASE_URL environment variables are not set." >&2
+# Validate environment and prerequisites
+validate_environment() {
+    print_step "Validating environment..."
+    
+    # Check for .env file
+    if [ ! -f "cicd/.env" ] && [ ! -f ".env" ]; then
+        print_warning "No .env file found in cicd/ or project root"
+        print_warning "Make sure GITHUB_TOKEN and DATABASE_URL are set in your environment"
+    fi
+    
+    # Check required environment variables
+    if [[ -z "$GITHUB_TOKEN" ]]; then
+        print_error "GITHUB_TOKEN environment variable is not set"
+        print_error "This is required for building the Docker image"
         exit 1
     fi
+    
+    if [[ -z "$DATABASE_URL" ]]; then
+        print_error "DATABASE_URL environment variable is not set"
+        print_error "This is required for SQLx to prepare queries during build"
+        print_error "Example: DATABASE_URL=sqlite:main.db"
+        exit 1
+    fi
+    
+    # Check for required source files
+    if [ ! -d "source" ]; then
+        print_error "Source directory not found"
+        print_error "Make sure you're running this from the project root"
+        exit 1
+    fi
+    
+    if [ ! -f "source/Cargo.toml" ]; then
+        print_error "source/Cargo.toml not found"
+        print_error "Make sure the Rust project structure is correct"
+        exit 1
+    fi
+    
+    print_step "Environment validation passed!"
+}
+
+# Function to build the production image
+build_production() {
+    check_directory
+    validate_environment
 
     print_step "Building production Docker image..."
 
-    # Build the production image using secrets
+    # Build the production image using build arguments
     docker build \
-        --secret id=github_token,src=<(echo "$GITHUB_TOKEN") \
-        --secret id=database_url,src=<(echo "$DATABASE_URL") \
+        --build-arg GITHUB_TOKEN="$GITHUB_TOKEN" \
+        --build-arg DATABASE_URL="$DATABASE_URL" \
         -f cicd/Dockerfile.debian.optimized \
         -t nicojudgedotcom:latest \
         .
 
     if [ $? -eq 0 ]; then
         print_step "Production image built successfully!"
+        print_step "Image tagged as: nicojudgedotcom:latest"
     else
         print_error "Failed to build production image"
+        print_error "Check the Docker build logs above for details"
         exit 1
     fi
 }
@@ -77,16 +112,32 @@ run_production() {
     docker stop nicojudgedotcom 2>/dev/null || true
     docker rm nicojudgedotcom 2>/dev/null || true
 
-    # Run the production container
+    # Check for runtime environment variables
+    if [[ -z "$GITHUB_TOKEN" ]]; then
+        print_warning "GITHUB_TOKEN not set - GitHub API features may not work"
+    fi
+    
+    if [[ -z "$DATABASE_URL" ]]; then
+        print_warning "DATABASE_URL not set - using default sqlite:main.db"
+        DATABASE_URL="sqlite:main.db"
+    fi
+
+    # Run the production container with environment variables
     docker run -d \
         --name nicojudgedotcom \
         -p 8080:8080 \
+        -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+        -e DATABASE_URL="${DATABASE_URL}" \
+        -e RUST_LOG="${RUST_LOG:-info}" \
         nicojudgedotcom:latest
 
     if docker ps | grep -q nicojudgedotcom:latest; then
         print_step "Production container is running!"
+        print_step "Access the application at: http://localhost:8080"
+        print_step "View logs with: ./build.sh logs"
     else
         print_error "Failed to start production container"
+        docker logs nicojudgedotcom 2>/dev/null || true
         exit 1
     fi
 }
@@ -103,6 +154,7 @@ cleanup() {
 # Function to deploy to DigitalOcean Container Registry
 deploy() {
     check_directory
+    validate_environment
 
     # Default values
     REGISTRY_NAME=${DO_REGISTRY_NAME:-""}
@@ -212,11 +264,20 @@ usage() {
     echo "  cleanup     Clean up Docker resources"
     echo "  help        Show this help message"
     echo ""
-    echo " Mandatory environment variables:"
+    echo "Environment Setup:"
+    echo "  Create a .env file in the cicd/ directory or project root with:"
+    echo "    GITHUB_TOKEN=your_github_personal_access_token"
+    echo "    DATABASE_URL=sqlite:main.db  # or your database connection string"
+    echo "    DO_REGISTRY_NAME=your_digitalocean_registry_name  # for deploy only"
+    echo "    DO_IMAGE_NAME=nicojudgedotcom  # optional, defaults to 'nicojudgedotcom'"
+    echo ""
+    echo "Required environment variables:"
     echo "  GITHUB_TOKEN     - GitHub personal access token (required for build)"
     echo "  DATABASE_URL     - Database connection string (required for build)"
     echo "  DO_REGISTRY_NAME - DigitalOcean Container Registry name (required for deploy)"
     echo "  DO_IMAGE_NAME    - Image name (optional, defaults to 'nicojudgedotcom')"
+    echo ""
+    echo "Note: The script will source .env files from both cicd/.env and ./.env"
 }
 
 # Main script logic
@@ -228,7 +289,6 @@ case "${1:-help}" in
         run_production
         ;;
     "deploy")
-        build_production
         deploy
         ;;
     "logs")

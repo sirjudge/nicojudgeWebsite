@@ -4,15 +4,20 @@ services:
   web:
     build:
       context: ..
-      dockerfile: cicd/Dockerfile
+      dockerfile: cicd/Dockerfile.debian.optimized
+      args:
+        - GITHUB_TOKEN=${GITHUB_TOKEN}
+        - DATABASE_URL=${DATABASE_URL}
     ports:
       - "8080:8080"
     environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - DATABASE_URL=${DATABASE_URL}
       - RUST_LOG=info
       - PORT=8080
       - IP=0.0.0.0
     volumes:
-      # Mount the database file for persistence
+      # Mount the database file for persistence (optional - image includes a copy)
       - ../source/main.db:/app/main.db
     restart: unless-stopped
 
@@ -27,6 +32,8 @@ services:
       - ../source:/app
       - /app/target
     environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - DATABASE_URL=${DATABASE_URL}
       - RUST_LOG=debug
       - PORT=8080
       - IP=0.0.0.0
