@@ -1,5 +1,5 @@
 # Dev Note:
-Cursor auto generated this documentation 
+Cursor auto generated this documentation, I have 
 
 # CI/CD Setup for NicoJudge Website
 
