@@ -11,21 +11,6 @@ use dioxus::{
 #[cfg(feature = "server")]
 use sqlx::{FromRow, Row};
 
-#[server]
-pub async fn get_blog_posts() -> Result<Vec<BlogPost>, ServerFnError> {
-    let blog_post_1 = BlogPost {
-        id: Some(1),
-        title: "Cool title 1".to_string(),
-        content: "This is content 1".to_string(),
-    };
-    let blog_post_2 = BlogPost {
-        id: Some(2),
-        title: "Cool title 2".to_string(),
-        content: "This is content 2".to_string(),
-    };
-
-    Ok(vec![blog_post_1, blog_post_2])
-}
 
 #[component]
 pub fn blog_table_rows(blog_list: Vec<BlogPost>) -> Element {
