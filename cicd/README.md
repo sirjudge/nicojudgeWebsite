@@ -46,14 +46,16 @@ DO_IMAGE_NAME=nicojudgedotcom  # optional, defaults to nicojudgedotcom
 
 ### Environment Variable Details
 
-- **GITHUB_TOKEN**: Personal access token for GitHub API access during build
+- **GITHUB_TOKEN**: Personal access token for GitHub API access
   - Generate at: https://github.com/settings/tokens
-  - Required permissions depend on your repository access needs
+  - **Build time**: Required for SQLx query preparation and dependency resolution
+  - **Runtime**: Required for GitHub API calls in the web application
+  - If not provided at runtime, GitHub-related features will not work
 
-- **DATABASE_URL**: Connection string for SQLx to prepare queries during build
+- **DATABASE_URL**: Connection string for database access
   - For SQLite: `sqlite:path/to/database.db`
-  - For PostgreSQL: `postgresql://user:password@host:port/database`
-  - For MySQL: `mysql://user:password@host:port/database`
+  - **Build time**: Required for SQLx query preparation
+  - **Runtime**: Required for database connections (defaults to `sqlite:main.db`)
 
 - **DO_REGISTRY_NAME**: Your DigitalOcean Container Registry name (for deployment)
 - **DO_IMAGE_NAME**: Custom image name (defaults to `nicojudgedotcom`)
@@ -108,6 +110,11 @@ The `Dockerfile.debian.optimized` uses a multi-stage build approach:
 2. **"DATABASE_URL not set"**: Ensure the database URL is properly configured in `.env`
 3. **SQLx preparation fails**: Verify your database is accessible and the URL is correct
 4. **Build fails on dependencies**: Try cleaning Docker cache with `docker system prune`
+5. **GitHub API returns 401 in container**: The `GITHUB_TOKEN` environment variable is not available at runtime
+   - **Solution**: Ensure your `.env` file is properly sourced before running the container
+   - **Check**: Run `echo $GITHUB_TOKEN` to verify the token is available in your shell
+   - **Docker run**: The build script automatically passes the token to the container
+   - **Docker Compose**: Make sure to run `docker-compose up` from the directory containing `.env`
 
 ### Build Arguments vs Secrets
 

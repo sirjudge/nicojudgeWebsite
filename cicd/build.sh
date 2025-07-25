@@ -112,16 +112,32 @@ run_production() {
     docker stop nicojudgedotcom 2>/dev/null || true
     docker rm nicojudgedotcom 2>/dev/null || true
 
-    # Run the production container
+    # Check for runtime environment variables
+    if [[ -z "$GITHUB_TOKEN" ]]; then
+        print_warning "GITHUB_TOKEN not set - GitHub API features may not work"
+    fi
+    
+    if [[ -z "$DATABASE_URL" ]]; then
+        print_warning "DATABASE_URL not set - using default sqlite:main.db"
+        DATABASE_URL="sqlite:main.db"
+    fi
+
+    # Run the production container with environment variables
     docker run -d \
         --name nicojudgedotcom \
         -p 8080:8080 \
+        -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+        -e DATABASE_URL="${DATABASE_URL}" \
+        -e RUST_LOG="${RUST_LOG:-info}" \
         nicojudgedotcom:latest
 
     if docker ps | grep -q nicojudgedotcom:latest; then
         print_step "Production container is running!"
+        print_step "Access the application at: http://localhost:8080"
+        print_step "View logs with: ./build.sh logs"
     else
         print_error "Failed to start production container"
+        docker logs nicojudgedotcom 2>/dev/null || true
         exit 1
     fi
 }

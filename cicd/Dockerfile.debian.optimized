@@ -97,14 +97,13 @@ RUN chown -R app:app /app
 # Switch to app user
 USER app
 
-# set dioxus environment variables
-ENV GITHUB_TOKEN=${GITHUB_TOKEN}
-ENV DATABASE_URL=${DATABASE_URL}
+# Set environment variables for runtime
 ENV PORT=8080
 ENV IP=0.0.0.0
-
-# set Rust and app runtime variables
 ENV RUST_LOG=info
+
+# Note: GITHUB_TOKEN and DATABASE_URL should be provided at runtime
+# via docker run -e or docker-compose environment variables
 
 # Expose the correct port
 EXPOSE 8080

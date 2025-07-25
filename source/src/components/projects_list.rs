@@ -63,16 +63,19 @@ pub async fn fetch_github_repos() -> Result<Vec<Repository>, ServerFnError> {
 
     // Create auth and user agent headers
     let mut headers = HeaderMap::new();
-    headers.insert(USER_AGENT, HeaderValue::from_static("nicojudge.com"));
+    headers.insert(USER_AGENT, HeaderValue::from_static("nicojudgedotcom"));
+    let git_token =std::env::var("GITHUB_TOKEN")?;
     headers.insert(
         AUTHORIZATION,
-        HeaderValue::from_str(&format!("Bearer {}", std::env::var("GITHUB_TOKEN")?))?,
+        HeaderValue::from_str(&format!("Bearer {}",git_token))?,
     );
+
 
     // initialize git api endpoint
     let git_api_url = "https://api.github.com/user/repos?sort=pushed&direction=desc";
 
     // return either the repo vector or a prorper error response string
+    //BUG: This is failing in the docker container but not when running local
     match client.get(git_api_url).headers(headers).send().await {
         Ok(response) => {
             if response.status().is_success() {
