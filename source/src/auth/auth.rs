@@ -24,3 +24,4 @@ pub async fn validate_login(username: String, password: String) -> Result<bool, 
         Ok(false)
     }
 }
+

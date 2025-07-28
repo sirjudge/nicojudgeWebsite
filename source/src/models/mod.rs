@@ -8,3 +8,7 @@ pub use blog_post::get_post_by_id;
 pub use blog_post::get_post_list;
 pub use blog_post::save_post;
 
+mod account;
+pub use account::Role;
+pub use account::Account;
+
