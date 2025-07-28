@@ -1,30 +1,13 @@
-use crate::components::{AdminLogin, AdminView};
+use crate::{
+    components::{AdminLogin, AdminView},
+    auth::{validate_session, validate_login}
+};
 use dioxus::{
     logger::tracing::{info, warn},
     prelude::*,
 };
 
-// TODO: obviously this is not secure, I'll be coming back to this later
-// and adding proper auth and session managment later
-// but don't need to worry about that when I have no actual functionality
-// TODO: Should also log bad login attempts as well
-#[server]
-pub async fn validate_login(username: String, password: String) -> Result<bool, ServerFnError> {
-    if username == "admin" && password == "password" {
-        info!("Admin login successful");
-        Ok(true)
-    } else {
-        warn!("Admin login failed for user: {}", username);
-        Ok(false)
-    }
-}
 
-// TODO: This is a placeholder for session validation logic.
-// In a real application, you would check if the user is logged in.
-#[server]
-pub async fn validate_session() -> Result<bool, ServerFnError> {
-    Ok(true)
-}
 
 #[component]
 pub fn NotWorkingNotice() -> Element {
@@ -36,11 +19,16 @@ pub fn NotWorkingNotice() -> Element {
 #[component]
 pub fn Admin() -> Element {
     let session_valid: Option<bool> = Some(true);
+
+    //TODO: Swap back to use this to validate a session first then
+    // display admin only if proper session validation has ocurred
+    // which means a successful login has ocurred
     // let session_valid: Option<bool> = Some(false);
     //BUG: This be not working, just set to true for now and figure this part out later
     // use_server_future(|| async {
     //     session_valid = Some(validate_session().await.unwrap());
     // });
+
 
     match session_valid {
         Some(session_valid) => {

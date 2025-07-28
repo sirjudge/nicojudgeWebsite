@@ -1,5 +1,6 @@
 use crate::models::Repository;
 use dioxus::{logger::tracing::error, prelude::*};
+#[cfg(feature = "server")]
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
 
 #[component]
@@ -70,7 +71,9 @@ pub async fn fetch_github_repos() -> Result<Vec<Repository>, ServerFnError> {
         HeaderValue::from_str(&format!("Bearer {}",git_token))?,
     );
 
-
+    //TODO: Should really cache this to prevent spamming attacks of this URL
+    //maybe something like this:
+    //https://docs.rs/http-cache-reqwest/latest/http_cache_reqwest/
     // initialize git api endpoint
     let git_api_url = "https://api.github.com/user/repos?sort=pushed&direction=desc";
 

@@ -7,6 +7,8 @@ pub mod views;
 /// The models module contains all the data structures and logic for our app.
 pub mod models;
 
+pub mod auth;
+
 /// Database connection and migration management using SQLx.
 /// Only included for server builds.
 #[cfg(feature = "server")]

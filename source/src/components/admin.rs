@@ -1,5 +1,8 @@
 use dioxus::prelude::{server_fn::error::Result, *};
-use crate::{components::{MaintenanceSettings, NewEditBlog}, models::BlogPost};
+use crate::{
+    components::{MaintenanceSettings, NewEditBlog},
+    models::BlogPost,
+};
 
 #[component]
 pub fn AdminView() -> Element {
