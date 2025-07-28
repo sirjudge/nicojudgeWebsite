@@ -1,4 +1,4 @@
-mod auth;
-pub use auth::validate_session;
-pub use auth::validate_login;
+mod authentication;
+pub use authentication::validate_session;
+pub use authentication::validate_login;
 

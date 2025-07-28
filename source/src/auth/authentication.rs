@@ -1,5 +1,5 @@
 use dioxus::{
-    logger::tracing::{error, info, warn},
+    logger::tracing::{info,warn},
     prelude::*,
 };
 
