@@ -1,5 +1,4 @@
 use crate::components::BlogPostFormData;
-
 #[cfg(feature = "server")]
 use crate::database::create_connection;
 use dioxus::{
