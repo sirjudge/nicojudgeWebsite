@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::database::create_connection;
 #[cfg(feature = "server")]
 use sqlx::{FromRow, Row};
+use crate::models::{Account, get_account_by_username};
 
 // TODO: This is a placeholder for session validation logic.
 // In a real application, you would check if the user is logged in.
@@ -21,12 +22,19 @@ pub async fn validate_session() -> Result<bool, ServerFnError> {
 // TODO: Should also log bad login attempts as well
 #[server]
 pub async fn validate_login(username: String, password: String) -> Result<bool, ServerFnError> {
-    if username == "admin" && password == "password" {
-        info!("Admin login successful");
-        Ok(true)
-    } else {
-        warn!("Admin login failed for user: {}", username);
-        Ok(false)
-    }
+
+    let account = get_account_by_username(username);
+
+    //TODO: Final step should be to remove this
+    Ok(true)
 }
 
+#[server]
+async fn hash_password(password: String) -> Result<String, ServerFnError> {
+    if password.is_empty() {
+        return Err(ServerFnError::new("input password is empty when it should not be"));
+    }
+
+
+    Ok("".to_string())
+}
