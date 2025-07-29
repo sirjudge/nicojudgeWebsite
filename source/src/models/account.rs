@@ -111,3 +111,31 @@ pub async fn get_account_by_username(username: String) -> Result<Option<Account>
         }
     }
 }
+
+
+//TODO: Need to fill these out to do stuff, just keeping here for now
+#[cfg(test)]
+mod test {
+    use crate::models::account::save_new_account;
+    use super::*;
+    use async_std::task;
+
+    #[test]
+    fn save(){
+        let username = "nico".to_string();
+        let password = "password".to_string();
+        let result = task::block_on(save_new_account(username, password, Role::Admin));
+        assert!(result.is_ok(), "expected an account returned when there was none");
+    }
+
+    #[test]
+    fn get_account_by_username_with_valid_account(){
+        unimplemented!();
+        let account_id = 1;
+    }
+
+    #[test]
+    fn get_account_by_id_with_valid_account(){
+        unimplemented!();
+    }
+}

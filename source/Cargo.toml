@@ -19,7 +19,7 @@ dioxus-fullstack = "0.6.3"
 fmt = "0.1.0"
 chrono = { version = "0.4.24", features = ["serde"] }
 bcrypt = { version="0.17.0", optional = true}
-
+async-std = "1.13.1"
 
 [features]
 default = ["web"]
