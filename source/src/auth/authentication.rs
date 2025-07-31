@@ -19,6 +19,7 @@ use sqlx::{FromRow, Row};
 // In a real application, you would check if the user is logged in.
 #[server]
 pub async fn validate_session() -> Result<bool, ServerFnError> {
+    warn!("This feature is not yet implemented and is returning true every time");
     Ok(true)
 }
 

@@ -1,9 +1,11 @@
-use dioxus::prelude::{server_fn::error::Result, *};
 use crate::{
+    auth::{validate_login, validate_session},
     components::{MaintenanceSettings, NewEditBlog},
     models::BlogPost,
-    auth::{validate_login, validate_session}
 };
+use dioxus::logger::tracing::{error, info, warn};
+use dioxus::prelude::{server_fn::error::Result, *};
+use serde::{Deserialize, Serialize};
 
 #[component]
 pub fn AdminView() -> Element {
@@ -22,30 +24,56 @@ pub fn AdminView() -> Element {
 
 #[component]
 pub fn AdminLogin() -> Element {
+    let mut username = use_signal(|| "".to_string());
+    let mut password = use_signal(|| "".to_string());
+
     rsx! {
         div {
             class: "admin-login",
             h1 { "Admin Login" }
             form {
-                label { "Username:" }
-                br { }
+                id: "admin-login-form",
+                style: "display:flex; flex-direction:column;",
+                onsubmit: move |_| {
+                    info!("Form submitted with username:{} and password:{}", username, password);
+                    spawn(async move {
+                        let username_string = username.read().to_string();
+                        let password_string = password.read().to_string();
+                        match validate_login(username_string, password_string).await {
+                            Ok(is_valid) => {
+                                if is_valid {
+                                    info!("Successful login yipee!");
+                                }
+                                else {
+                                    error!("Unsuccesful error, nope")
+                                }
+                            }
+                            Err(err) => {
+                                error!("Login error:{}", err);
+                            }
+                        }
+                    });
+                },
+                label { "Username:" },
                 input {
                     r#type: "text",
                     placeholder: "Username",
                     name: "username",
                     required: true,
-                }
-                br { }
-                br { }
-                label { "Password:" }
-                br { }
+                    oninput: move |input_event| {
+                        username.set(input_event.value().clone());
+                    }
+                },
+                label { "Password:" },
                 input {
                     r#type: "password",
                     placeholder: "Password",
                     name: "password",
                     required: true,
-                }
-                br { }
+                    oninput: move |input_event| {
+                        password.set(input_event.value().clone());
+                    }
+                },
                 //TODO: pass this to a server function and validate the login
                 // and redirect to admin page if successful
                 button {
@@ -56,4 +84,3 @@ pub fn AdminLogin() -> Element {
         }
     }
 }
-
