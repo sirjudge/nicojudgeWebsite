@@ -2,8 +2,14 @@ use crate::auth::{login_with_session, LoginResponse, CurrentUser};
 use dioxus::logger::tracing::{error, info, warn};
 use dioxus::prelude::*;
 
+#[derive(Props, Clone, PartialEq)]
+pub struct LoginFormProps {
+    #[props(optional)]
+    pub on_login_success: Option<Callback<CurrentUser>>,
+}
+
 #[component]
-pub fn LoginForm() -> Element {
+pub fn LoginForm(props: LoginFormProps) -> Element {
     let mut username = use_signal(|| "".to_string());
     let mut password = use_signal(|| "".to_string());
     let mut login_status = use_signal(|| "".to_string());
@@ -14,16 +20,16 @@ pub fn LoginForm() -> Element {
         div {
             class: "login-container",
             style: "max-width: 400px; margin: 0 auto; padding: 20px;",
-
+            
             h2 { "Login" }
-
+            
             if !login_status.read().is_empty() {
                 div {
                     class: if login_status.read().contains("successful") { "success-message" } else { "error-message" },
-                    style: if login_status.read().contains("successful") {
-                        "color: green; margin-bottom: 10px;"
-                    } else {
-                        "color: red; margin-bottom: 10px;"
+                    style: if login_status.read().contains("successful") { 
+                        "color: green; margin-bottom: 10px;" 
+                    } else { 
+                        "color: red; margin-bottom: 10px;" 
                     },
                     "{login_status}"
                 }
@@ -50,7 +56,8 @@ pub fn LoginForm() -> Element {
                     onsubmit: move |_| {
                         let username_val = username.read().clone();
                         let password_val = password.read().clone();
-
+                        let on_success = props.on_login_success.clone();
+                        
                         if username_val.is_empty() || password_val.is_empty() {
                             login_status.set("Please enter both username and password".to_string());
                             return;
@@ -70,7 +77,21 @@ pub fn LoginForm() -> Element {
                                     is_loading.set(false);
                                     if response.success {
                                         login_status.set("Login successful!".to_string());
-                                        current_user.set(response.user);
+                                        if let Some(user) = response.user.clone() {
+                                            current_user.set(Some(user.clone()));
+                                            
+                                            // Store session ID for persistence
+                                            if let Some(session_id) = &response.session_id {
+                                                info!("Session ID received: {}", session_id);
+                                                // TODO: Store session ID in browser storage
+                                                // store_session_id(session_id.clone()).await;
+                                            }
+                                            
+                                            // Notify parent component if callback provided
+                                            if let Some(callback) = on_success {
+                                                callback.call(user);
+                                            }
+                                        }
                                         info!("User logged in successfully");
                                     } else {
                                         let message = response.message.clone();
@@ -86,12 +107,12 @@ pub fn LoginForm() -> Element {
                             }
                         });
                     },
-
+                    
                     div {
                         style: "margin-bottom: 15px;",
-                        label {
+                        label { 
                             style: "display: block; margin-bottom: 5px;",
-                            "Username:"
+                            "Username:" 
                         }
                         input {
                             r#type: "text",
@@ -103,12 +124,12 @@ pub fn LoginForm() -> Element {
                             }
                         }
                     }
-
+                    
                     div {
                         style: "margin-bottom: 15px;",
-                        label {
+                        label { 
                             style: "display: block; margin-bottom: 5px;",
-                            "Password:"
+                            "Password:" 
                         }
                         input {
                             r#type: "password",
@@ -120,7 +141,7 @@ pub fn LoginForm() -> Element {
                             }
                         }
                     }
-
+                    
                     button {
                         r#type: "submit",
                         disabled: *is_loading.read(),

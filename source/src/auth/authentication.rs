@@ -1,6 +1,7 @@
 #[cfg(feature = "server")]
 use crate::database::create_connection;
-use crate::models::{get_account_by_username, get_account_by_id, Account, Session, create_session, get_session};
+use crate::models::{get_account_by_username, get_account_by_id, Account};
+use super::{Session, create_session, get_session};
 #[cfg(feature = "server")]
 use password_hash::SaltString;
 // #[cfg(feature = "server")]
