@@ -17,7 +17,9 @@ pub fn AdminView() -> Element {
             h1 { "Admin Page" }
             p { "This is the admin page for managing the application." }
             MaintenanceSettings {}
+            br {}
             NewEditBlog {}
+            br {}
             AddAccount {}
         }
     }

@@ -25,7 +25,8 @@ pub struct Account {
 
 #[server]
 pub async fn save_new_account(username: String, password: String, role: Role) -> Result<Account, ServerFnError> {
-    let password_hash = auth::hash_password(password).await.unwrap();
+    // Use random salt for better security
+    let password_hash = auth::hash_password(password).await?;
     let role_id = role.clone() as i32;
     match create_connection().await {
         Ok(mut conn) => {
@@ -43,8 +44,8 @@ pub async fn save_new_account(username: String, password: String, role: Role) ->
                     let inserted_id = query_result.last_insert_rowid() as i32;
                     Ok(Account {
                         account_id: Some(inserted_id),
-                        username: "test".to_string(),
-                        password_hash: "hashy_hash".to_string(),
+                        username,
+                        password_hash,
                         role_id
                     })
                 }
