@@ -19,8 +19,11 @@ dioxus-fullstack = "0.6.3"
 fmt = "0.1.0"
 chrono = { version = "0.4.24", features = ["serde"] }
 async-std = { version = "1.13.1", optional=true }
-argon2 = { version = "0.5.3", optional=true }
 password-hash = { version = "0.5.0", optional=true }
+# Updated scrypt to a compatible version with password-hash integration
+scrypt = { version = "0.11", optional = true }
+# Argon2 for password hashing (more modern and recommended)
+argon2 = { version = "0.5.0", optional = true }
 # rand = { version = "0.9.2", optional=true }
 
 [features]
@@ -30,7 +33,7 @@ web = ["dioxus/web"]
 # The feature that are only required for the desktop build target should be optional and only enabled in the desktop feature
 desktop = ["dioxus/desktop"]
 # The feature that are only required for the server build target should be optional and only enabled in the server feature
-server = ["dioxus/server", "sqlx" , "async-std", "argon2", "password-hash"]
+server = ["dioxus/server", "sqlx", "argon2", "password-hash", "async-std"]
 
 [build]
 jobs = 2

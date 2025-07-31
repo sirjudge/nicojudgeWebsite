@@ -42,6 +42,7 @@ pub async fn save_new_account(username: String, password: String, role: Role) ->
             match result {
                 Ok(query_result) => {
                     let inserted_id = query_result.last_insert_rowid() as i32;
+                    info!("Account inserted into db successfully!");
                     Ok(Account {
                         account_id: Some(inserted_id),
                         username,

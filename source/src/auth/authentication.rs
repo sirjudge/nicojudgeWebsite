@@ -29,29 +29,20 @@ pub async fn validate_session() -> Result<bool, ServerFnError> {
 // TODO: Should also log bad login attempts as well
 #[server]
 pub async fn validate_login(username: String, password: String) -> Result<bool, ServerFnError> {
-    match get_account_by_username(username)
-        .await
-        .expect("error retrieving account for login validation")
-    {
+    match get_account_by_username(username).await? {
         Some(account) => {
-            let password_hash = hash_password(password)
-                .await
-                .expect("Error hashing password for login validation");
-            if password_hash == account.password_hash {
-                info!("Passwords match yippee");
+            // Use the verify_password_hash function to check the password
+            let is_valid = verify_password_hash(password, account.password_hash).await?;
+            if is_valid {
+                info!("Login successful for user: {}", account.username);
                 Ok(true)
             } else {
-                error!(
-                    "Passwords don't match. new hash:{} Saved hash:{}",
-                    password_hash, account.password_hash
-                );
+                warn!("Invalid password attempt for user: {}", account.username);
                 Ok(false)
             }
         }
         None => {
-            //TODO: Should handle this a bit better, fine to keep as
-            //error message for now
-            error!("account not found in lookup to validate");
+            warn!("Login attempt for non-existent user");
             Ok(false)
         }
     }
@@ -64,25 +55,43 @@ pub async fn hash_password(password: String) -> Result<String, ServerFnError> {
             "input password is empty when it should not be",
         ));
     }
-    //TODO: RustCrypto suggests using this but it doesn't
-    //specify where OsRng comes from . . . deal with it later and instead use env variable
-    //for now
-    // let salt = SaltString::generate(&mut OsRng);
-    let argon2 = Argon2::default();
-    let salt = std::env::var("DB_PWD_SALT")
-        .map_err(|_| ServerFnError::new("DB_PWD_SALT environment variable not set"))?;
-    let salt_string = SaltString::new(&salt).unwrap();
-    let pwd_hash = argon2
-        .hash_password(password.as_bytes(), &salt_string)
-        .unwrap();
-    info!(
-        "Successfully hashed password:{} into hash:{}",
-        password, pwd_hash
-    );
-    Argon2::default()
-        .verify_password(password.as_bytes(), &pwd_hash)
-        .expect("invalid password");
 
-    // Ok(hash.to_string())
-    Ok("".to_string())
+    // Use Argon2 for password hashing
+    let argon2 = Argon2::default();
+    
+    // Generate a random salt (more secure than fixed salt)
+    use password_hash::rand_core::OsRng;
+    let salt = SaltString::generate(&mut OsRng);
+    
+    // Hash the password
+    let password_hash = argon2
+        .hash_password(password.as_bytes(), &salt)
+        .map_err(|e| ServerFnError::new(format!("Failed to hash password: {}", e)))?;
+    
+    info!("Successfully hashed password");
+    
+    // Return the hash string (includes the salt)
+    Ok(password_hash.to_string())
+}
+
+#[server]
+pub async fn verify_password_hash(password: String, stored_hash: String) -> Result<bool, ServerFnError> {
+    if password.is_empty() {
+        return Err(ServerFnError::new("Password cannot be empty"));
+    }
+    
+    if stored_hash.is_empty() {
+        return Err(ServerFnError::new("Stored hash cannot be empty"));
+    }
+    
+    // Parse the stored hash
+    use password_hash::PasswordHash;
+    let parsed_hash = PasswordHash::new(&stored_hash)
+        .map_err(|e| ServerFnError::new(format!("Failed to parse stored hash: {}", e)))?;
+    
+    // Verify the password against the stored hash
+    match Argon2::default().verify_password(password.as_bytes(), &parsed_hash) {
+        Ok(()) => Ok(true),
+        Err(_) => Ok(false), // Don't expose the specific error for security reasons
+    }
 }
