@@ -1,5 +1,4 @@
 use crate::models::{save_post, BlogPost};
-
 use dioxus::{
     logger::tracing::{debug, error, info, warn},
     prelude::*,

@@ -1,13 +1,14 @@
 [application]
 
 [web.app]
-
 # HTML title tag content
-title = "web"
+# Old title
+# title = "web"
+# new title
+# title = "nicojudge.com"
 
 # include `assets` in web platform
 [web.resource]
-
 # Additional CSS style files
 style = []
 
@@ -15,7 +16,6 @@ style = []
 script = []
 
 [web.resource.dev]
-
 # Javascript code file
 # serve: [dev-server] only
 script = []
