@@ -1,6 +1,7 @@
 use dioxus::prelude::{ServerFnError, *};
 use dioxus::logger::tracing::{info,warn,error};
 use serde::{Serialize, Deserialize};
+use crate::auth;
 #[cfg(feature = "server")]
 use crate::database::create_connection;
 #[cfg(feature = "server")]
@@ -24,10 +25,7 @@ pub struct Account {
 
 #[server]
 pub async fn save_new_account(username: String, password: String, role: Role) -> Result<Account, ServerFnError> {
-    let password_salt = std::env::var("DB_PWD_SALT")?;
-    //TODO: Need to actually hash here but fine to just use password as
-    //the hash for now to get this bit hooked up
-    let password_hash = password;
+    let password_hash = auth::hash_password(password).await.unwrap();
     let role_id = role.clone() as i32;
     match create_connection().await {
         Ok(mut conn) => {
