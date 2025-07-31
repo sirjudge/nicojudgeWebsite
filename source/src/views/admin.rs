@@ -9,7 +9,7 @@ use dioxus::{
 
 #[component]
 pub fn Admin() -> Element {
-    let session_valid: Option<bool> = Some(true);
+    let session_valid: Option<bool> = Some(false);
 
     //TODO: Swap back to use this to validate a session first then
     // display admin only if proper session validation has ocurred
