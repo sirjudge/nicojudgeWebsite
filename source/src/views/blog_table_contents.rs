@@ -1,5 +1,3 @@
-#[cfg(feature = "server")]
-use crate::database::create_connection;
 use crate::{
     models::{get_post_list, BlogPost},
     route::Route,
@@ -9,8 +7,9 @@ use dioxus::{
     prelude::*,
 };
 #[cfg(feature = "server")]
+use crate::database::create_connection;
+#[cfg(feature = "server")]
 use sqlx::{FromRow, Row};
-
 
 #[component]
 pub fn blog_table_rows(blog_list: Vec<BlogPost>) -> Element {
@@ -38,7 +37,6 @@ pub fn blog_table_rows(blog_list: Vec<BlogPost>) -> Element {
 
 #[component]
 pub fn BlogTableOfContents() -> Element {
-    debug!("Extracting blog table data now");
     let blog_post_list = use_resource(move || async move { get_post_list().await });
 
     // this is an unholy abomination
@@ -50,8 +48,8 @@ pub fn BlogTableOfContents() -> Element {
                 return rsx! {
                     table {
                         tr {
-                            th { "id" }
-                            th { "title" }
+                            th { "Id" }
+                            th { "Title" }
                         }
                         blog_table_rows { blog_list: post_list.clone() }
                     }
