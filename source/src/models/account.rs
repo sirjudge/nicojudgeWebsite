@@ -1,12 +1,11 @@
 use dioxus::prelude::{ServerFnError, *};
-use dioxus::logger::tracing::{info,warn,error};
 use serde::{Serialize, Deserialize};
-use crate::auth;
 #[cfg(feature = "server")]
 use crate::database::create_connection;
 #[cfg(feature = "server")]
 use sqlx::{FromRow, Row};
-
+use crate::auth;
+use dioxus::logger::tracing::{info, error};
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum Role {
     Admin = 1,

@@ -54,18 +54,12 @@ fn main() {
         .with_cfg(web! {
             dioxus::web::Config::default().rootname("app")
         })
-        //NOTE: Don't need this as we aren't serving a desktop application at
-        //the moment, it just be fullstack/server + web
-        // And desktop config
-        // .with_cfg(desktop! {
-        //     dioxus::desktop::Config::default().with_root_name("app")
-        // })
         .launch(app);
 }
 
 fn app() -> Element {
     if MAINTENANCE_MODE {
-        error!("Maintenance mode is enabled. The site will not be accessible.");
+        warn!("Maintenance mode is enabled. The site will not be accessible.");
         return rsx! { MaintenanceBanner {} };
     }
 

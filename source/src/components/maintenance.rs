@@ -1,21 +1,20 @@
 #[cfg(feature = "server")]
 use crate::database::create_connection;
+#[cfg(feature = "server")]
+use chrono::{DateTime, Utc};
 use dioxus::logger::tracing::{error, info};
 use dioxus::prelude::*;
 #[cfg(feature = "server")]
 use sqlx::{FromRow, Row};
 
-#[cfg(feature = "server")]
-use chrono::{DateTime, Utc};
-
 #[component]
 pub fn MaintenanceSettings() -> Element {
     let mut maintenance_box = use_signal(|| false);
-    // spawn(async {get_mode().await});
     spawn(async move {
         match get_mode().await {
             Ok(enabled) => {
-                info!("Loaded enabled bit from db");
+                info!("Loaded enabled bit from db:{}", enabled);
+                maintenance_box.set(enabled);
             }
             Err(err) => {
                 error!("Error occurred when extracting bit form db:{err}");
@@ -32,7 +31,6 @@ pub fn MaintenanceSettings() -> Element {
                 onsubmit:  move |_| {
                     spawn(async move {
                         if *maintenance_box.read() {
-                            info!("enbabling maintenance_mode");
                             match save_mode(true).await {
                                 Ok(_) => { info!("Enabled maintenance_mode");},
                                 Err(e) => { error!("error ocured during enabling maintenance_mode:{}", e);}
@@ -88,16 +86,13 @@ async fn get_mode() -> Result<bool, ServerFnError> {
             match result {
                 Ok(query_result) => {
                     info!("Extracted query_results:{:?}", query_result);
-                   match query_result {
-                       Some(result) =>{
-                           Ok(result.maintenance_mode)
-                       }
-                       None =>{
+                    match query_result {
+                        Some(result) => Ok(result.maintenance_mode),
+                        None => {
                             info!("No mode could be found, defaulting to false");
                             Ok(false)
-                       }
-
-                   }
+                        }
+                    }
                 }
 
                 Err(e) => {
@@ -118,7 +113,6 @@ async fn get_mode() -> Result<bool, ServerFnError> {
 async fn save_mode(enabled: bool) -> Result<(), ServerFnError> {
     match create_connection().await {
         Ok(mut conn) => {
-            info!("inserting new value for maintenance_mode:{}", enabled);
             let updated_date = Utc::now();
             let result = sqlx::query!(
                 "INSERT INTO web_flags (maintenance_mode,updated_date) VALUES (?1,?2)",
@@ -146,6 +140,5 @@ async fn save_mode(enabled: bool) -> Result<(), ServerFnError> {
             )));
         }
     }
-
     Ok(())
 }
