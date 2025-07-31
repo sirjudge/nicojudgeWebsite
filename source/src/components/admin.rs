@@ -1,6 +1,6 @@
 use crate::{
     auth::{validate_login, validate_session},
-    components::{MaintenanceSettings, NewEditBlog},
+    components::{MaintenanceSettings, NewEditBlog, AddAccount},
     models::BlogPost,
 };
 use dioxus::logger::tracing::{error, info, warn};
@@ -18,6 +18,7 @@ pub fn AdminView() -> Element {
             p { "This is the admin page for managing the application." }
             MaintenanceSettings {}
             NewEditBlog {}
+            AddAccount {}
         }
     }
 }

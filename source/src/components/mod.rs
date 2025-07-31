@@ -21,3 +21,6 @@ pub use maintenance::MaintenanceSettings;
 mod admin;
 pub use admin::AdminView;
 pub use admin::AdminLogin;
+
+mod account;
+pub use account::AddAccount;
