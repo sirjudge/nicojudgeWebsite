@@ -67,13 +67,33 @@ pub async fn save_new_account(username: String, password: String, role: Role) ->
 
 #[server]
 pub async fn get_account_by_id(account_id: i32) -> Result<Option<Account>, ServerFnError>{
-    //TODO: Need to implement this
-    Ok(Some(Account {
-         account_id: None,
-         username: "test".to_string(),
-         password_hash: "".to_string(),
-         role_id: Role::Admin as i32
-    }))
+    match create_connection().await {
+        Ok(mut conn) => {
+            let result = sqlx::query_as::<_, Account>(
+                "SELECT account_id, username, password_hash, role_id
+                FROM accounts
+                WHERE account_id = ?1",
+            )
+            .bind(account_id)
+            .fetch_optional(&mut conn)
+            .await;
+
+            match result {
+                Ok(account) => Ok(account),
+                Err(e) => {
+                    error!("Error loading account: {}", e);
+                    Err(ServerFnError::new(format!("Error loading account: {}", e)))
+                }
+            }
+        }
+        Err(e) => {
+            error!("Database connection error: {}", e);
+            Err(ServerFnError::new(format!(
+                "Database connection error: {}"
+                , e
+            )))
+        }
+    }
 }
 
 #[server]

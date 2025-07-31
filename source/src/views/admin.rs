@@ -1,6 +1,6 @@
 use crate::{
     auth::{validate_login, validate_session},
-    components::{AdminLogin, AdminView},
+    components::{AdminView, LoginForm},
 };
 use dioxus::{
     logger::tracing::{info, warn},
@@ -26,7 +26,7 @@ pub fn Admin() -> Element {
             if !session_valid {
                 warn!("Admin session is not valid, redirecting to login page");
                 return rsx! {
-                    AdminLogin {}
+                    LoginForm {}
                 };
             }
 

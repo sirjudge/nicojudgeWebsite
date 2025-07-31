@@ -1,6 +1,6 @@
 #[cfg(feature = "server")]
 use crate::database::create_connection;
-use crate::models::{get_account_by_username, Account};
+use crate::models::{get_account_by_username, get_account_by_id, Account, Session, create_session, get_session};
 #[cfg(feature = "server")]
 use password_hash::SaltString;
 // #[cfg(feature = "server")]
@@ -15,12 +15,114 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "server")]
 use sqlx::{FromRow, Row};
 
+/// Current user information for the session
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+pub struct CurrentUser {
+    pub account_id: i32,
+    pub username: String,
+    pub role_id: i32,
+    pub session_id: String,
+}
+
+/// Login request structure
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct LoginRequest {
+    pub username: String,
+    pub password: String,
+}
+
+/// Login response structure
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct LoginResponse {
+    pub success: bool,
+    pub message: String,
+    pub session_id: Option<String>,
+    pub user: Option<CurrentUser>,
+}
+
 // TODO: This is a placeholder for session validation logic.
 // In a real application, you would check if the user is logged in.
 #[server]
 pub async fn validate_session() -> Result<bool, ServerFnError> {
     warn!("This feature is not yet implemented and is returning true every time");
     Ok(true)
+}
+
+/// Get the current user from session
+#[server]
+pub async fn get_current_user(session_id: String) -> Result<Option<CurrentUser>, ServerFnError> {
+    match get_session(session_id.clone()).await? {
+        Some(session) => {
+            // Get the account details by ID
+            match get_account_by_id(session.account_id).await? {
+                Some(account) => {
+                    Ok(Some(CurrentUser {
+                        account_id: account.account_id.unwrap_or(0),
+                        username: account.username,
+                        role_id: account.role_id,
+                        session_id,
+                    }))
+                }
+                None => Ok(None)
+            }
+        }
+        None => Ok(None)
+    }
+}
+
+/// Login function that creates a session
+#[server]
+pub async fn login_with_session(
+    username: String, 
+    password: String,
+    ip_address: Option<String>,
+    user_agent: Option<String>
+) -> Result<LoginResponse, ServerFnError> {
+    match get_account_by_username(username.clone()).await? {
+        Some(account) => {
+            // Verify the password
+            let is_valid = verify_password_hash(password, account.password_hash).await?;
+            if is_valid {
+                // Create a new session
+                let session = create_session(
+                    account.account_id.unwrap_or(0),
+                    ip_address,
+                    user_agent
+                ).await?;
+
+                info!("Login successful for user: {}", account.username);
+                
+                Ok(LoginResponse {
+                    success: true,
+                    message: "Login successful".to_string(),
+                    session_id: Some(session.session_id.clone()),
+                    user: Some(CurrentUser {
+                        account_id: account.account_id.unwrap_or(0),
+                        username: account.username,
+                        role_id: account.role_id,
+                        session_id: session.session_id,
+                    }),
+                })
+            } else {
+                warn!("Invalid password attempt for user: {}", username);
+                Ok(LoginResponse {
+                    success: false,
+                    message: "Invalid credentials".to_string(),
+                    session_id: None,
+                    user: None,
+                })
+            }
+        }
+        None => {
+            warn!("Login attempt for non-existent user: {}", username);
+            Ok(LoginResponse {
+                success: false,
+                message: "Invalid credentials".to_string(),
+                session_id: None,
+                user: None,
+            })
+        }
+    }
 }
 
 // TODO: obviously this is not secure, I'll be coming back to this later
