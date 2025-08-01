@@ -1,4 +1,3 @@
-use dioxus::html::image;
 use dioxus::logger::tracing::{debug, error, info, warn};
 use dioxus::prelude::*;
 
@@ -15,9 +14,9 @@ pub fn Bio() -> Element {
         div {
             class: "bio",
             style: "display: flex; flex-direction: column;",
-            h2 { 
+            h2 {
                 style: "margin-bottom: 20px;",
-                "About Me" 
+                "About Me"
             },
             // Two-column content area
             div {
