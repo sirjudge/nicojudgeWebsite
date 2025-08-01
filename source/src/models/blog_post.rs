@@ -1,11 +1,11 @@
 use crate::components::BlogPostFormData;
-#[cfg(feature = "server")]
-use crate::database::create_connection;
 use dioxus::{
     logger::tracing::{error, info},
     prelude::*,
 };
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "server")]
+use crate::database::create_connection;
 #[cfg(feature = "server")]
 use sqlx::{FromRow, Row};
 
@@ -63,18 +63,16 @@ pub async fn get_post_list() -> Result<Vec<BlogPost>, ServerFnError> {
                     .fetch_all(&mut conn)
                     .await;
 
-            stream.into_iter().for_each(|post| {
-                info!("Found post:{:?}", post);
-                return_list.append(&mut post.clone())
-            });
+            stream
+                .into_iter()
+                .for_each(|mut post| return_list.append(&mut post));
 
             Ok(return_list)
         }
-        Err(error) => {
-            let error_message = format!("uh oh error occurred extrating list of posts:{:?}", error);
-            error!(error_message);
-            Err(ServerFnError::new(error_message))
-        }
+        Err(error) => Err(ServerFnError::new(format!(
+            "uh oh error occurred extrating list of posts:{:?}",
+            error
+        ))),
     }
 }
 
@@ -96,8 +94,6 @@ pub async fn get_post_list() -> Result<Vec<BlogPost>, ServerFnError> {
 pub async fn get_post_by_id(post_id: i32) -> Result<Option<BlogPost>, ServerFnError> {
     match create_connection().await {
         Ok(mut conn) => {
-            info!("Successfully connected to the database");
-
             let result = sqlx::query_as::<_, BlogPost>(
                 "SELECT id, title, content FROM blog_posts WHERE id = ?1",
             )
@@ -120,12 +116,9 @@ pub async fn get_post_by_id(post_id: i32) -> Result<Option<BlogPost>, ServerFnEr
                 }
             }
         }
-        Err(e) => {
-            error!("Database connection error: {e}");
-            Err(ServerFnError::new(format!(
-                "Database connection error: {e}"
-            )))
-        }
+        Err(e) => Err(ServerFnError::new(format!(
+            "Database connection error: {e}"
+        ))),
     }
 }
 
@@ -149,8 +142,6 @@ pub async fn get_post_by_id(post_id: i32) -> Result<Option<BlogPost>, ServerFnEr
 pub async fn save_post(blog_post_to_save: BlogPost) -> Result<Option<BlogPost>, ServerFnError> {
     match create_connection().await {
         Ok(mut conn) => {
-            info!("Opened connection to SQLite, saving new blog post");
-
             let result = sqlx::query!(
                 "INSERT INTO blog_posts (title, content) VALUES (?1, ?2)",
                 blog_post_to_save.title,
@@ -163,17 +154,13 @@ pub async fn save_post(blog_post_to_save: BlogPost) -> Result<Option<BlogPost>, 
                 Ok(query_result) => {
                     let inserted_id = query_result.last_insert_rowid() as i32;
                     info!("Blog post saved with id: {inserted_id}");
-
-                    let saved_post = BlogPost {
+                    Ok(Some(BlogPost {
                         id: Some(inserted_id),
                         title: blog_post_to_save.title,
                         content: blog_post_to_save.content,
-                    };
-
-                    Ok(Some(saved_post))
+                    }))
                 }
                 Err(e) => {
-                    error!("Error occurred during blog insert: {e}");
                     Err(ServerFnError::new(format!(
                         "Error occurred during blog insert: {e}"
                     )))
@@ -181,7 +168,6 @@ pub async fn save_post(blog_post_to_save: BlogPost) -> Result<Option<BlogPost>, 
             }
         }
         Err(e) => {
-            error!("Database connection error: {e}");
             Err(ServerFnError::new(format!(
                 "Database connection error: {e}"
             )))

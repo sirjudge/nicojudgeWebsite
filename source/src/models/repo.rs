@@ -5,4 +5,5 @@ pub struct Repository {
     pub name: String,
     pub description: Option<String>,
     pub pushed_at: String,
+    pub html_url: String,
 }

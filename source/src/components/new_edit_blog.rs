@@ -1,6 +1,6 @@
 use crate::models::{save_post, BlogPost};
 use dioxus::{
-    logger::tracing::{debug, error, info, warn},
+    logger::tracing::{error, info},
     prelude::*,
 };
 use serde::{Deserialize, Serialize};

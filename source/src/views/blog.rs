@@ -1,21 +1,21 @@
 use std::vec;
 
 use crate::{
-    components::{ResourceNotFound, UnexpectedError},
-    models::{get_post_by_id, BlogPost, BlogPostModel},
+    components::{ResourceNotFound},
+    models::{get_post_by_id, BlogPostModel},
 };
 
 use dioxus::{
-    logger::tracing::{debug, error, field::debug, warn},
+    logger::tracing::{error, warn},
     prelude::*,
 };
 
+//TODO: Should revisit this later
 // const BLOG_CSS: Asset = asset!("/assets/styling/blog.css");
 
 pub async fn get_blog_model(post_id: i32) -> Option<BlogPostModel> {
     match get_post_by_id(post_id).await {
         Ok(Some(post)) => {
-            debug!("Blog post with id {post_id} found: {post:?}");
             Some(post.to_model())
         }
         Ok(None) => {
@@ -35,9 +35,8 @@ pub async fn get_blog_model(post_id: i32) -> Option<BlogPostModel> {
 /// re-run and the rendered HTML will be updated.
 #[component]
 pub fn Blog(id: i32) -> Element {
-    debug!("Rendering blog post with id: {id}");
-    // Use use_resource to call the server function
     let post_resource = use_resource(move || async move { get_blog_model(id).await });
+
     let x = match &*post_resource.read() {
         Some(Some(post)) => {
             rsx! {
@@ -50,9 +49,6 @@ pub fn Blog(id: i32) -> Element {
                         id: "blog-post-title-{id}",
                         "{post.title}"
                     }
-                    //TODO: this isn't rendering the HTML correctly. I think
-                    //it's just dipslaying the HTML as raw text instead of rednering
-                    //the actual html content
                     //TODO: Maybe don't use danger_inner_html but eh what's the worst that could
                     //happen
                     p {
@@ -69,12 +65,8 @@ pub fn Blog(id: i32) -> Element {
             }
         }
         None => {
-            debug!("Loading blog post with id {id}");
             rsx! {
-                div {
-                    class: "loading",
-                    p { "Loading blog post..." }
-                }
+                p { "Loading blog post..." }
             }
         }
     };

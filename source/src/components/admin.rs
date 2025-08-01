@@ -13,9 +13,7 @@ pub fn AdminView() -> Element {
     // cookie magic or session management stuff
     rsx! {
         div {
-            class: "admin-page",
-            h1 { "Admin Page" }
-            p { "This is the admin page for managing the application." }
+            h1 { "Admin Settings" }
             MaintenanceSettings {}
             br {}
             NewEditBlog {}
@@ -77,8 +75,6 @@ pub fn AdminLogin() -> Element {
                         password.set(input_event.value().clone());
                     }
                 },
-                //TODO: pass this to a server function and validate the login
-                // and redirect to admin page if successful
                 button {
                     r#type: "submit",
                     "Login"

@@ -7,25 +7,16 @@ use dioxus::prelude::*;
 pub fn AddAccount() -> Element {
     let mut username = use_signal(|| "".to_string());
     let mut password = use_signal(|| "".to_string());
-    //TODO: Change this to be Role, string is what
-    //the example uses
-    let mut role = use_signal(|| "".to_string());
+    let mut role = use_signal(|| Role::Guest );
 
     rsx! {
         form {
             id: "admin-add-account-form",
             style: "display:flex; flex-direction:column;",
             onsubmit: move |_| {
-                info!("adding new username + password to account db");
                 spawn(async move {
                     let username_str = username.read().to_string();
-                    let password_str = password.read().to_string(); 
-                    let role_string = role.read().to_string();
-                    let role_enum = match role_string.as_str() {
-                        "admin" => { Role::Admin},
-                        "user" => { Role::User },
-                        _ => { Role::Guest }
-                    };
+                    let password_str = password.read().to_string();
 
                     let mut is_error = false;
                     if username_str.is_empty() {
@@ -40,7 +31,8 @@ pub fn AddAccount() -> Element {
                         return;
                     }
 
-                    match save_new_account(username_str, password_str, role_enum).await {
+                    let role_value = (*role.read()).clone();
+                    match save_new_account(username_str, password_str, role_value).await {
                         Ok(new_account) => {
                             info!("New account created:{:?}", new_account);
                         },
@@ -69,7 +61,12 @@ pub fn AddAccount() -> Element {
             label { "Select role"},
             select {
                 onchange: move |evt| {
-                    role.set(evt.value().clone());
+                    let role_enum = match evt.value().clone().as_str() {
+                        "admin" => { Role::Admin},
+                        "user" => { Role::User },
+                        _ => { Role::Guest }
+                    };
+                    role.set(role_enum);
                 },
                 option { value: "", "Select a role..." },  // Default option
                 option { value: "admin", "Admin" },

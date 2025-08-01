@@ -46,14 +46,14 @@ pub fn Admin() -> Element {
 
     // Get the current session state value to avoid borrow conflicts
     let current_session_state = session_state.read().clone();
-    
+
     match current_session_state {
         SessionState::Loading => {
             rsx! {
                 div {
                     style: "text-align: center; padding: 50px;",
                     p { "Validating session..." }
-                    p { 
+                    p {
                         style: "color: #666; font-size: 0.9em;",
                         "Please wait while we check your authentication status."
                     }
@@ -72,7 +72,7 @@ pub fn Admin() -> Element {
                             // Add a logout option
                             div {
                                 style: "position: fixed; top: 10px; right: 10px; background: white; padding: 10px; border: 1px solid #ddd; border-radius: 5px;",
-                                p { 
+                                p {
                                     style: "margin: 0 0 10px 0; font-size: 0.9em;",
                                     "Logged in as: {user_info.username}"
                                 }
@@ -135,9 +135,9 @@ enum SessionState {
 async fn get_stored_session_id() -> Option<String> {
     // TODO: Implement actual session storage retrieval
     // For now, return None to simulate no stored session
-    // 
+    //
     // Real implementation examples:
-    // 
+    //
     // Option 1: Using web_sys for localStorage
     // use web_sys::window;
     // if let Some(window) = window() {
@@ -145,21 +145,21 @@ async fn get_stored_session_id() -> Option<String> {
     //         return storage.get_item("session_id").ok().flatten();
     //     }
     // }
-    // 
+    //
     // Option 2: Using cookies (would need a cookie crate)
     // return get_cookie("session_id");
-    // 
+    //
     // Option 3: Using URL parameters or headers in SSR context
-    
+
     warn!("Session storage not implemented - returning None");
     None
 }
 
 async fn store_session_id(session_id: String) {
     // TODO: Implement actual session storage
-    // 
+    //
     // Real implementation examples:
-    // 
+    //
     // Option 1: Using web_sys for localStorage
     // use web_sys::window;
     // if let Some(window) = window() {
@@ -167,18 +167,18 @@ async fn store_session_id(session_id: String) {
     //         let _ = storage.set_item("session_id", &session_id);
     //     }
     // }
-    // 
+    //
     // Option 2: Using cookies (would need a cookie crate)
     // set_cookie("session_id", &session_id, expires_in_days(30));
-    
+
     info!("Session ID would be stored: {}", session_id);
 }
 
 async fn clear_stored_session_id() {
     // TODO: Implement actual session storage clearing
-    // 
+    //
     // Real implementation examples:
-    // 
+    //
     // Option 1: Using web_sys for localStorage
     // use web_sys::window;
     // if let Some(window) = window() {
@@ -186,9 +186,9 @@ async fn clear_stored_session_id() {
     //         let _ = storage.remove_item("session_id");
     //     }
     // }
-    // 
+    //
     // Option 2: Using cookies
     // clear_cookie("session_id");
-    
+
     info!("Session cleared from storage");
 }
