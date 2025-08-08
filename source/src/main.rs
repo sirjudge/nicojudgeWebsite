@@ -10,10 +10,8 @@ use web::{components::MaintenanceBanner, route::Route, views::Navbar};
 // Import server functions to ensure they are registered
 #[allow(unused_imports)]
 use web::auth::{
-    test_server_function, test_login_simple, test_login_account_lookup, test_password_verify, test_login_no_session,
-    test_session_creation, test_simple_session_creation, test_login_with_simple_session,
-    login_with_session_and_cookies, login_with_session_and_cookies_fixed, logout_with_cookies,
-    get_current_user, validate_session, hash_password, verify_password_hash,
+    login_with_session_and_cookies, logout_with_cookies,
+    get_current_user, hash_password, verify_password_hash, validate_login,
 };
 
 // We can import assets in dioxus with the `asset!` macro. This macro takes a path to an asset relative to the crate root.

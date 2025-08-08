@@ -69,8 +69,6 @@ pub async fn create_session(
     let expires_at = now + Duration::hours(config.duration_hours);
 
     // OWASP: Limit concurrent sessions per user
-    // TEMPORARILY DISABLED FOR DEBUGGING NS_BINDING_ABORTED ISSUE
-    /*
     if let Some(max_sessions) = config.max_concurrent_sessions {
         let active_sessions = count_active_sessions(account_id).await?;
         if active_sessions >= max_sessions {
@@ -79,8 +77,6 @@ pub async fn create_session(
             invalidate_oldest_session(account_id).await?;
         }
     }
-    */
-    info!("Skipping concurrent session limit check for debugging");
 
     match create_connection().await {
         Ok(mut conn) => {

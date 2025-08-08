@@ -1,5 +1,5 @@
 use crate::{
-    auth::{validate_login, validate_session},
+    auth::validate_login,
     components::{MaintenanceSettings, NewEditBlog, AddAccount},
     models::BlogPost,
 };
