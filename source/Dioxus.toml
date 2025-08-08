@@ -2,10 +2,16 @@
 
 [web.app]
 # HTML title tag content
-# Old title
-# title = "web"
-# new title
-# title = "nicojudge.com"
+title = "Nico Judge - Admin"
+# Use custom HTML template
+index_template = "assets/index.html"
+
+# Server configuration for fullstack mode
+[web.server]
+# Enable server functions
+server_fn = true
+# Server port (optional, defaults to 8080)
+port = 8080
 
 # include `assets` in web platform
 [web.resource]

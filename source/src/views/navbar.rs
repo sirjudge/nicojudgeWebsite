@@ -24,7 +24,7 @@ pub fn Navbar() -> Element {
                 }
                 Link {
                     to: Route::BlogTableOfContents {},
-                    "BlogContents"
+                    "Blog"
                 }
                 Link {
                     to: Route::Projects {},

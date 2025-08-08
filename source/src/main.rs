@@ -1,17 +1,20 @@
 use dioxus::{
-    dioxus_core::LaunchConfig,
     logger::{
         self,
-        tracing::{debug, error, field::debug, warn, Level},
+        tracing::{debug, warn, Level},
     },
     prelude::*,
-    web::Config,
 };
-use web::{components::MaintenanceBanner, route::Route};
+use web::{components::MaintenanceBanner, route::Route, views::Navbar};
 
-// Server-only imports for Axum integration
-#[cfg(feature = "server")]
-use dioxus::fullstack::prelude::ServeConfigBuilder;
+// Import server functions to ensure they are registered
+#[allow(unused_imports)]
+use web::auth::{
+    test_server_function, test_login_simple, test_login_account_lookup, test_password_verify, test_login_no_session,
+    test_session_creation, test_simple_session_creation, test_login_with_simple_session,
+    login_with_session_and_cookies, login_with_session_and_cookies_fixed, logout_with_cookies,
+    get_current_user, validate_session, hash_password, verify_password_hash,
+};
 
 // We can import assets in dioxus with the `asset!` macro. This macro takes a path to an asset relative to the crate root.
 // The macro returns an `Asset` type that will display as the path to the asset in the browser or a local path in desktop bundles.
@@ -24,9 +27,9 @@ const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
 const MAINTENANCE_MODE: bool = false;
 
 fn main() {
+    // Initialize logging
     match logger::init(Level::DEBUG) {
         Ok(_) => {
-            // Logger initialized successfully
             debug!("Logger initialized successfully");
         }
         Err(e) => {
@@ -34,27 +37,16 @@ fn main() {
         }
     }
 
-    // Configure the server to serve static assets
+    // Database initialization will be done lazily on first connection
+    // This avoids needing tokio in the main function
     #[cfg(feature = "server")]
-    let config = ServeConfigBuilder::default().build().unwrap();
+    {
+        use dioxus::logger::tracing::info;
+        info!("Database will be initialized on first connection");
+    }
 
-    #[cfg(feature = "server")]
-    dioxus::LaunchBuilder::new().with_cfg(config).launch(app);
-
-    #[cfg(not(feature = "server"))]
-    dioxus::LaunchBuilder::new().launch(app);
-
-    LaunchBuilder::new()
-        // Only set the server config if the server feature is enabled
-        .with_cfg(server_only! {
-            ServeConfigBuilder::default()
-                .root_id("app")
-        })
-        // You also need to set the root id in your web config
-        .with_cfg(web! {
-            dioxus::web::Config::default().rootname("app")
-        })
-        .launch(app);
+    // Use the fullstack launch for Dioxus 0.6 which automatically handles server functions
+    dioxus::launch(app);
 }
 
 fn app() -> Element {
@@ -64,11 +56,9 @@ fn app() -> Element {
     }
 
     rsx! {
-        div {
-            document::Link { rel: "icon", href: FAVICON },
-            document::Link { rel: "stylesheet", href: MAIN_CSS },
-            document::Link { rel: "stylesheet", href: TAILWIND_CSS },
-            Router::<Route> {}
-        }
+        document::Link { rel: "icon", href: FAVICON },
+        document::Link { rel: "stylesheet", href: MAIN_CSS },
+        document::Link { rel: "stylesheet", href: TAILWIND_CSS },
+        Router::<Route> {}
     }
 }

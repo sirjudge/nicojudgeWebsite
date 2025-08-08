@@ -1,6 +1,7 @@
 use crate::{
     models::{get_post_list, BlogPost},
     route::Route,
+    views::Navbar,
 };
 use dioxus::{
     logger::tracing::{debug, error, info, warn},

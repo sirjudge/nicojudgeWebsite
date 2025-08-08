@@ -15,3 +15,6 @@ pub mod auth;
 pub mod database;
 
 pub mod route;
+
+/// Test server functions module
+pub mod test_server;

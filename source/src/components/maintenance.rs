@@ -71,7 +71,7 @@ pub struct WebFlags {
 }
 
 #[server]
-async fn get_mode() -> Result<bool, ServerFnError> {
+pub async fn get_mode() -> Result<bool, ServerFnError> {
     match create_connection().await {
         Ok(mut conn) => {
             let result = sqlx::query_as::<_, WebFlags>(
@@ -110,7 +110,7 @@ async fn get_mode() -> Result<bool, ServerFnError> {
 }
 
 #[server]
-async fn save_mode(enabled: bool) -> Result<(), ServerFnError> {
+pub async fn save_mode(enabled: bool) -> Result<(), ServerFnError> {
     match create_connection().await {
         Ok(mut conn) => {
             let updated_date = Utc::now();
